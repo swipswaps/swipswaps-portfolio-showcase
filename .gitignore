@@ -22,3 +22,7 @@ Editor files
 # Local notes
 notes/
 notes/
+
+# Local database files
+*.db
+*.sqlite
