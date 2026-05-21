@@ -296,7 +296,6 @@
             renderer.setPixelRatio(window.devicePixelRatio);
             document.body.appendChild(renderer.domElement);
             
-            // OrbitControls for dragging
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
@@ -316,7 +315,7 @@
             backLight.position.set(-2, 1, -4);
             scene.add(backLight);
             
-            // Starfield background
+            // Starfield
             const starGeometry = new THREE.BufferGeometry();
             const starCount = 1500;
             const starPositions = new Float32Array(starCount * 3);
@@ -329,13 +328,12 @@
             const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: 0xaaccff, size: 0.1 }));
             scene.add(stars);
             
-            // Tooltip div
+            // Tooltip
             tooltipDiv = document.createElement('div');
             tooltipDiv.className = 'tag-tooltip';
             tooltipDiv.style.display = 'none';
             document.body.appendChild(tooltipDiv);
             
-            // Animation loop
             function animate() {
                 requestAnimationFrame(animate);
                 controls.update();
@@ -344,7 +342,6 @@
             }
             animate();
             
-            // Handle window resize
             window.addEventListener('resize', onWindowResize);
             function onWindowResize() {
                 camera.aspect = window.innerWidth / window.innerHeight;
@@ -354,46 +351,38 @@
         }
         
         // ============================================================
-        // FIXED: Raycaster with proper click detection
-        // The issue was that the click listener wasn't being re-attached
-        // after the cloud was recreated, and the raycaster wasn't using
-        // the updated camera matrix from OrbitControls.
+        // FIXED: Raycaster with proper null checking
+        // The error was because some objects didn't have userData.repo
         // ============================================================
         
         function attachClickHandler() {
             const raycaster = new THREE.Raycaster();
             const mouse = new THREE.Vector2();
-            
-            // Get the DOM element for coordinate mapping
             const canvas = renderer.domElement;
             
-            // Mouse move for tooltips
             const onMouseMove = (event) => {
                 if (!tagSprites.length) return;
                 
-                // Calculate mouse position in normalized coordinates (-1 to +1)
                 mouse.x = (event.clientX / canvas.clientWidth) * 2 - 1;
                 mouse.y = -(event.clientY / canvas.clientHeight) * 2 + 1;
                 
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(tagSprites);
                 
-                if (intersects.length > 0) {
-                    const repo = intersects[0].userData.repo;
-                    if (repo) {
-                        tooltipDiv.style.display = 'block';
-                        tooltipDiv.innerHTML = `<strong>${repo.name}</strong><br>📝 ${repo.language}<br>⭐ ${repo.stars} stars<br>📅 ${repo.date}`;
-                        tooltipDiv.style.left = (event.clientX + 15) + 'px';
-                        tooltipDiv.style.top = (event.clientY - 50) + 'px';
-                        canvas.style.cursor = 'pointer';
-                    }
+                // FIX: Check if intersects exists and has userData with repo
+                if (intersects.length > 0 && intersects[0].object && intersects[0].object.userData && intersects[0].object.userData.repo) {
+                    const repo = intersects[0].object.userData.repo;
+                    tooltipDiv.style.display = 'block';
+                    tooltipDiv.innerHTML = `<strong>${repo.name}</strong><br>📝 ${repo.language}<br>⭐ ${repo.stars} stars<br>📅 ${repo.date}`;
+                    tooltipDiv.style.left = (event.clientX + 15) + 'px';
+                    tooltipDiv.style.top = (event.clientY - 50) + 'px';
+                    canvas.style.cursor = 'pointer';
                 } else {
                     tooltipDiv.style.display = 'none';
                     canvas.style.cursor = 'default';
                 }
             };
             
-            // Click handler - opens the repository URL
             const onClick = (event) => {
                 if (!tagSprites.length) return;
                 
@@ -403,16 +392,16 @@
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(tagSprites);
                 
-                if (intersects.length > 0) {
-                    const repo = intersects[0].userData.repo;
+                // FIX: Only open if we have valid repo data
+                if (intersects.length > 0 && intersects[0].object && intersects[0].object.userData && intersects[0].object.userData.repo) {
+                    const repo = intersects[0].object.userData.repo;
                     if (repo && repo.url) {
-                        console.log('Opening repo:', repo.name, repo.url);
+                        console.log('Opening:', repo.name, repo.url);
                         window.open(repo.url, '_blank');
                     }
                 }
             };
             
-            // Remove old listeners and add new ones
             window.removeEventListener('mousemove', onMouseMove);
             window.removeEventListener('click', onClick);
             window.addEventListener('mousemove', onMouseMove);
@@ -426,7 +415,6 @@
             });
             tagSprites = [];
             
-            // Filter repositories
             let filteredRepos = allRepos;
             if (currentFilter) {
                 filteredRepos = allRepos.filter(repo => 
@@ -437,23 +425,18 @@
             
             if (filteredRepos.length === 0) {
                 const emptyMsg = document.createElement('div');
-                emptyMsg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#888;z-index:50';
-                emptyMsg.textContent = 'No matching repositories';
+                emptyMsg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#888;z-index:50;background:#1a1a2e;padding:20px;border-radius:20px';
+                emptyMsg.textContent = '🔍 No matching repositories';
                 document.body.appendChild(emptyMsg);
                 setTimeout(() => emptyMsg.remove(), 2000);
                 return;
             }
             
-            // ============================================================
-            // CITATION: Fibonacci sphere algorithm for even distribution
-            // Source: "Evenly distributing points on a sphere" - Mike Bostock
-            // URL: https://observablehq.com/@mourner/mapping-points-on-a-sphere
-            // ============================================================
+            // Fibonacci sphere distribution
             const radius = 5.8;
             const goldenRatio = (1 + Math.sqrt(5)) / 2;
             
             filteredRepos.forEach((repo, idx) => {
-                // Fibonacci sphere distribution - ensures no overlaps
                 const theta = 2 * Math.PI * idx / goldenRatio;
                 const phi = Math.acos(1 - 2 * (idx + 0.5) / filteredRepos.length);
                 
@@ -461,23 +444,20 @@
                 const y = Math.sin(phi) * Math.sin(theta) * radius * 0.7;
                 const z = Math.cos(phi) * radius;
                 
-                // Create canvas texture for the tag
+                // Create canvas texture
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 canvas.width = 512;
                 canvas.height = 110;
                 
-                // Background
                 ctx.fillStyle = '#1a1a2e';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                // Border with language color
                 const langColor = getLanguageColor(repo.language);
                 ctx.strokeStyle = langColor;
                 ctx.lineWidth = 3;
                 ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
                 
-                // Repository name (truncated if too long)
                 let displayName = repo.name;
                 if (displayName.length > 28) {
                     displayName = displayName.slice(0, 25) + '...';
@@ -489,7 +469,6 @@
                 ctx.textBaseline = 'middle';
                 ctx.fillText(displayName, canvas.width / 2, canvas.height / 2 - 8);
                 
-                // Language and stars
                 ctx.font = '13px monospace';
                 ctx.fillStyle = langColor;
                 ctx.fillText(`${repo.language}  ★ ${repo.stars}`, canvas.width / 2, canvas.height / 2 + 22);
@@ -499,13 +478,13 @@
                 const sprite = new THREE.Sprite(material);
                 sprite.scale.set(2.8, 0.65, 1);
                 sprite.position.set(x, y, z);
+                // CRITICAL: Ensure userData.repo is set
                 sprite.userData = { repo: repo };
                 
                 scene.add(sprite);
                 tagSprites.push(sprite);
             });
             
-            // Attach click handlers after creating sprites
             attachClickHandler();
         }
         
@@ -526,7 +505,6 @@
             createTagCloud();
         });
         
-        // Initialize
         initThreeJS();
         fetchRepos();
     </script>
