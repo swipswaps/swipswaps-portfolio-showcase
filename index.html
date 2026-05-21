@@ -80,7 +80,6 @@
             max-height: 70vh;
             overflow-y: auto;
         }
-        /* Force high contrast for search panel text */
         .search-panel,
         .search-panel * {
             color: #e8edf5 !important;
@@ -231,29 +230,45 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+    // ============================================================
+    // FALLBACK DATA - Loads IMMEDIATELY so cloud appears instantly
+    // ============================================================
     const FALLBACK_REPOS = [
         { name: "observability-platform", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/observability-platform", date: "2026-05-18" },
         { name: "vscode-llm-multi-provider", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/vscode-llm-multi-provider", date: "2026-05-20" },
         { name: "sys-inspector", language: "Python", stars: 0, url: "https://github.com/swipswaps/sys-inspector", date: "2026-04-12" },
         { name: "parachute-cfd-game", language: "GDScript", stars: 0, url: "https://github.com/swipswaps/parachute-cfd-game", date: "2026-04-28" },
         { name: "bcm4331-self-healing", language: "Shell", stars: 0, url: "https://github.com/swipswaps/bcm4331-self-healing", date: "2026-04-22" },
-        { name: "callback-platform", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/callback-platform", date: "2026-05-15" }
+        { name: "callback-platform", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/callback-platform", date: "2026-05-15" },
+        { name: "firefox_fix", language: "Shell", stars: 0, url: "https://github.com/swipswaps/firefox_fix", date: "2026-05-14" },
+        { name: "conversation-search", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/conversation-search", date: "2026-05-10" },
+        { name: "Master-FB", language: "Python", stars: 0, url: "https://github.com/swipswaps/Master-FB", date: "2026-05-08" },
+        { name: "balloon-color-plan", language: "JavaScript", stars: 0, url: "https://github.com/swipswaps/balloon-color-plan", date: "2026-05-07" },
+        { name: "lossless-ffmpeg-concat", language: "Shell", stars: 0, url: "https://github.com/swipswaps/lossless-ffmpeg-concat", date: "2026-05-05" },
+        { name: "Masterclass-TUI", language: "Python", stars: 0, url: "https://github.com/swipswaps/Masterclass-TUI", date: "2026-05-03" },
+        { name: "controller-Unified", language: "C", stars: 0, url: "https://github.com/swipswaps/controller-Unified", date: "2026-05-01" },
+        { name: "deterministic-Network", language: "Python", stars: 0, url: "https://github.com/swipswaps/deterministic-Network", date: "2026-04-25" },
+        { name: "Video-Insight-Server", language: "Python", stars: 0, url: "https://github.com/swipswaps/Video-Insight-Server", date: "2026-04-20" },
+        { name: "Pro-Vista", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/Pro-Vista", date: "2026-04-18" },
+        { name: "GEMMA_4", language: "Python", stars: 0, url: "https://github.com/swipswaps/GEMMA_4", date: "2026-04-15" },
+        { name: "storyboard-studio", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/storyboard-studio", date: "2026-04-10" }
     ];
 
-    let allRepos = [];
+    let allRepos = [...FALLBACK_REPOS]; // Start with fallback immediately
     let tagSprites = [];
     let scene, camera, renderer, controls;
     let tooltipDiv;
 
-    async function fetchRepos() {
+    // Try to fetch real data in background (doesn't block rendering)
+    async function fetchRealRepos() {
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4000);
-            const res = await fetch('https://api.github.com/users/swipswaps/repos?sort=pushed&direction=desc&per_page=30', { signal: controller.signal });
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const res = await fetch('https://api.github.com/users/swipswaps/repos?sort=pushed&direction=desc&per_page=50', { signal: controller.signal });
             clearTimeout(timeoutId);
             if (res.ok) {
                 const data = await res.json();
-                if (data.length) {
+                if (data && data.length > 0) {
                     allRepos = data.map(r => ({
                         name: r.name,
                         language: r.language || 'Unknown',
@@ -261,18 +276,21 @@
                         url: r.html_url,
                         date: r.pushed_at ? r.pushed_at.slice(0,10) : '2026-01-01'
                     }));
-                    return;
+                    document.getElementById('data-badge').textContent = '✓ Live GitHub API';
+                    document.getElementById('data-badge').style.color = '#5effe0';
+                    // Refresh the cloud with real data
+                    createTagCloud();
                 }
             }
-            throw new Error('API failed');
         } catch(e) {
-            allRepos = [...FALLBACK_REPOS];
+            console.log('Using fallback data (GitHub API not available)');
+            document.getElementById('data-badge').textContent = '📦 Sample Data';
+            document.getElementById('data-badge').style.color = '#ffaa44';
         }
-        createTagCloud();
     }
 
     function getLanguageColor(lang) {
-        const c = { JavaScript:'#f7df1e', TypeScript:'#3178c6', Python:'#3572A5', Shell:'#89e051', GDScript:'#478cbf', Unknown:'#888' };
+        const c = { JavaScript:'#f7df1e', TypeScript:'#3178c6', Python:'#3572A5', Shell:'#89e051', GDScript:'#478cbf', Unknown:'#888', C:'#555555' };
         return c[lang] || '#44aaff';
     }
 
@@ -356,18 +374,12 @@
         attachInteractions();
     }
 
-    // --------------------------------------------------------------
-    // Improved click / double-click / touch handling
-    // --------------------------------------------------------------
-    let clickTimer = null;
-    let touchStartPos = null;
-
+    // Touch/click handling
     function attachInteractions() {
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         const canvas = renderer.domElement;
 
-        // Helper: get repo from mouse/touch position
         function getRepoFromEvent(clientX, clientY) {
             mouse.x = (clientX / canvas.clientWidth) * 2 - 1;
             mouse.y = -(clientY / canvas.clientHeight) * 2 + 1;
@@ -395,7 +407,7 @@
             }
         };
 
-        // Single click / tap (with drag detection)
+        // Single tap/click with drag detection
         let pointerDownPos = null;
         let pointerDownTime = 0;
 
@@ -409,7 +421,6 @@
             const dx = Math.abs(e.clientX - pointerDownPos.x);
             const dy = Math.abs(e.clientY - pointerDownPos.y);
             const duration = Date.now() - pointerDownTime;
-            // If movement < 10 pixels and duration < 500ms, treat as click/tap
             if (dx < 10 && dy < 10 && duration < 500) {
                 const repo = getRepoFromEvent(e.clientX, e.clientY);
                 if (repo && repo.url) {
@@ -419,7 +430,6 @@
             pointerDownPos = null;
         };
 
-        // Double-click for desktop (still works)
         const onDoubleClick = (e) => {
             const repo = getRepoFromEvent(e.clientX, e.clientY);
             if (repo && repo.url) {
@@ -427,7 +437,6 @@
             }
         };
 
-        // Remove old listeners and add new ones
         window.removeEventListener('mousemove', onMouseMove);
         window.removeEventListener('dblclick', onDoubleClick);
         window.removeEventListener('pointerdown', onPointerDown);
@@ -447,7 +456,7 @@
             const res = await fetch(`${BACKEND_URL}/api/health`, { method: 'HEAD', mode: 'cors' });
             if (res.ok) {
                 backendOnline = true;
-                statusDiv.innerHTML = '<span class="status-badge status-online"> ✅ Local backend is running</span>';
+                statusDiv.innerHTML = '<span class="status-badge status-online">✅ Local backend is running</span>';
                 document.getElementById('search-query').disabled = false;
                 document.getElementById('search-btn').disabled = false;
                 document.getElementById('instructions-panel').style.display = 'none';
@@ -517,9 +526,15 @@
         });
     }
 
+    // Initialize: show cloud IMMEDIATELY with fallback data
     initThreeJS();
-    await fetchRepos();
-    createTagCloud();
+    createTagCloud();  // Uses FALLBACK_REPOS (already loaded)
+    document.getElementById('data-badge')?.remove();
+    
+    // Then try to fetch real data in background
+    fetchRealRepos();
+    
+    // Check for local backend (for search)
     await checkBackend();
 
     document.getElementById('search-btn').addEventListener('click', performSearch);
