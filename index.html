@@ -154,19 +154,62 @@
         
         .tag-tooltip {
             position: fixed;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             backdrop-filter: blur(12px);
             color: #5effe0;
-            padding: 10px 18px;
+            padding: 12px 20px;
             border-radius: 30px;
             font-size: 12px;
             font-family: monospace;
             pointer-events: none;
             z-index: 200;
             border: 1px solid #5effe0;
-            white-space: nowrap;
-            transform: translate(-50%, -120%);
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            min-width: 200px;
+        }
+        
+        .related-links {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(94, 255, 224, 0.3);
+            font-size: 11px;
+        }
+        
+        .related-links a {
+            color: #88aacc;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 8px;
+            padding: 2px 6px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .related-links a:hover {
+            color: #5effe0;
+            background: rgba(94, 255, 224, 0.2);
+        }
+        
+        /* Right-click context menu replacement */
+        .context-menu {
+            position: fixed;
+            background: #1a1a2e;
+            border: 1px solid #5effe0;
+            border-radius: 8px;
+            padding: 8px 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            display: none;
+        }
+        .context-menu-item {
+            padding: 8px 20px;
+            cursor: pointer;
+            color: #e8edf5;
+            font-size: 13px;
+        }
+        .context-menu-item:hover {
+            background: #2a2a3e;
+            color: #5effe0;
         }
     </style>
 </head>
@@ -193,10 +236,18 @@
             <span>📦 <span id="total-count">—</span> repos</span>
             <span>⭐ <span id="star-count">—</span> stars</span>
             <span>🎯 <span id="visible-count">—</span> visible</span>
+            <span>🔗 <span id="related-count">0</span> connections</span>
         </div>
     </div>
-    <div class="controls-hint">🖱️ Drag to rotate • Hover for info • Click to open</div>
+    <div class="controls-hint">🖱️ Drag to rotate • Hover for connections • Right-click for menu • Click to open</div>
     <div id="loader">🌀 loading 3D tag cloud...</div>
+    
+    <div class="context-menu" id="context-menu">
+        <div class="context-menu-item" id="menu-copy-name">📋 Copy repository name</div>
+        <div class="context-menu-item" id="menu-copy-url">🔗 Copy GitHub URL</div>
+        <div class="context-menu-item" id="menu-open-new">🪟 Open in new tab</div>
+        <div class="context-menu-item" id="menu-show-related">🔍 Show related repos</div>
+    </div>
 
     <script type="importmap">
         {
@@ -216,22 +267,30 @@
         let scene, camera, renderer, controls;
         let tagSprites = [];
         let tooltipDiv;
+        let relationshipLines = [];
+        let currentHoveredRepo = null;
         
-        // Fallback repository data
+        // Fallback repository data with relationships
         const FALLBACK_REPOS = [
-            { name: "observability-platform", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/observability-platform", date: "2026-05-18" },
-            { name: "vscode-llm-multi-provider", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/vscode-llm-multi-provider", date: "2026-05-20" },
-            { name: "callback-platform", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/callback-platform", date: "2026-05-15" },
-            { name: "firefox_fix", language: "Shell", stars: 0, url: "https://github.com/swipswaps/firefox_fix", date: "2026-05-14" },
-            { name: "ice-tuner", language: "Python", stars: 0, url: "https://github.com/swipswaps/ice-tuner", date: "2026-05-12" },
-            { name: "conversation-search", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/conversation-search", date: "2026-05-10" },
-            { name: "Master-FB", language: "Python", stars: 0, url: "https://github.com/swipswaps/Master-FB", date: "2026-05-08" },
-            { name: "balloon-color-plan", language: "JavaScript", stars: 0, url: "https://github.com/swipswaps/balloon-color-plan", date: "2026-05-07" },
-            { name: "lossless-ffmpeg-concat", language: "Shell", stars: 0, url: "https://github.com/swipswaps/lossless-ffmpeg-concat", date: "2026-05-05" },
-            { name: "parachute-cfd-game", language: "GDScript", stars: 0, url: "https://github.com/swipswaps/parachute-cfd-game", date: "2026-04-28" },
-            { name: "sys-inspector", language: "Python", stars: 0, url: "https://github.com/swipswaps/sys-inspector", date: "2026-04-12" },
-            { name: "bcm4331-folder", language: "Shell", stars: 0, url: "https://github.com/swipswaps/bcm4331-folder", date: "2026-04-22" }
+            { name: "observability-platform", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/observability-platform", date: "2026-05-18", tags: ["observability", "monitoring", "timescaledb"] },
+            { name: "vscode-llm-multi-provider", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/vscode-llm-multi-provider", date: "2026-05-20", tags: ["llm", "vscode", "ai"] },
+            { name: "sys-inspector", language: "Python", stars: 0, url: "https://github.com/swipswaps/sys-inspector", date: "2026-04-12", tags: ["forensics", "debugging", "system"] },
+            { name: "parachute-cfd-game", language: "GDScript", stars: 0, url: "https://github.com/swipswaps/parachute-cfd-game", date: "2026-04-28", tags: ["cfd", "physics", "godot"] },
+            { name: "bcm4331-folder", language: "Shell", stars: 0, url: "https://github.com/swipswaps/bcm4331-folder", date: "2026-04-22", tags: ["network", "driver", "broadcom"] },
+            { name: "firefox_fix", language: "Shell", stars: 0, url: "https://github.com/swipswaps/firefox_fix", date: "2026-05-14", tags: ["firefox", "gpu", "diagnostics"] },
+            { name: "callback-platform", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/callback-platform", date: "2026-05-15", tags: ["api", "webhooks"] },
+            { name: "conversation-search", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/conversation-search", date: "2026-05-10", tags: ["search", "postgresql", "full-text"] }
         ];
+        
+        // Find related repos based on shared tags/language
+        function findRelatedRepos(repo, allRepos) {
+            if (!repo.tags) return [];
+            return allRepos.filter(r => 
+                r.name !== repo.name && 
+                r.tags && 
+                r.tags.some(tag => repo.tags.includes(tag))
+            ).slice(0, 5);
+        }
         
         async function fetchRepos() {
             const loader = document.getElementById('loader');
@@ -245,7 +304,8 @@
                             language: repo.language || 'Unknown',
                             stars: repo.stargazers_count || 0,
                             url: repo.html_url,
-                            date: repo.pushed_at.slice(0, 10)
+                            date: repo.pushed_at.slice(0, 10),
+                            tags: (repo.topics || []).concat([repo.language?.toLowerCase()]).filter(Boolean)
                         }));
                         document.getElementById('data-badge').textContent = '✓ Live GitHub API';
                         document.getElementById('data-badge').style.color = '#5effe0';
@@ -283,6 +343,59 @@
             return colors[lang] || '#44aaff';
         }
         
+        // ============================================================
+        // Create relationship lines between related repositories
+        // ============================================================
+        
+        function drawRelationshipLines(hoveredRepo) {
+            // Remove existing lines
+            relationshipLines.forEach(line => scene.remove(line));
+            relationshipLines = [];
+            
+            if (!hoveredRepo) return;
+            
+            const relatedRepos = findRelatedRepos(hoveredRepo, allRepos);
+            document.getElementById('related-count').textContent = relatedRepos.length;
+            
+            // Find the sprite positions
+            const hoveredSprite = tagSprites.find(s => s.userData.repo.name === hoveredRepo.name);
+            if (!hoveredSprite) return;
+            
+            const startPos = hoveredSprite.position.clone();
+            
+            relatedRepos.forEach(related => {
+                const endSprite = tagSprites.find(s => s.userData.repo.name === related.name);
+                if (endSprite) {
+                    const endPos = endSprite.position.clone();
+                    
+                    // Create a line geometry
+                    const points = [startPos, endPos];
+                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    
+                    // Color based on relationship strength
+                    const sharedTags = hoveredRepo.tags?.filter(t => related.tags?.includes(t)).length || 0;
+                    const lineColor = sharedTags > 1 ? 0x5effe0 : 0xffaa44;
+                    
+                    const material = new THREE.LineBasicMaterial({ color: lineColor, linewidth: 2 });
+                    const line = new THREE.Line(geometry, material);
+                    scene.add(line);
+                    relationshipLines.push(line);
+                    
+                    // Add a small glow sphere at midpoint for emphasis
+                    const midPoint = new THREE.Vector3(
+                        (startPos.x + endPos.x) / 2,
+                        (startPos.y + endPos.y) / 2,
+                        (startPos.z + endPos.z) / 2
+                    );
+                    const glowMat = new THREE.MeshBasicMaterial({ color: lineColor, transparent: true, opacity: 0.5 });
+                    const glowSphere = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), glowMat);
+                    glowSphere.position.copy(midPoint);
+                    scene.add(glowSphere);
+                    relationshipLines.push(glowSphere);
+                }
+            });
+        }
+        
         function initThreeJS() {
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x050b1a);
@@ -291,10 +404,17 @@
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(0, 1, 12);
             
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); // preserveDrawingBuffer for screenshots
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             document.body.appendChild(renderer.domElement);
+            
+            // Enable right-click on canvas (prevent default context menu)
+            renderer.domElement.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                showContextMenu(e);
+                return false;
+            });
             
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
@@ -351,9 +471,74 @@
         }
         
         // ============================================================
-        // FIXED: Raycaster with proper null checking
-        // The error was because some objects didn't have userData.repo
+        // Right-click context menu
         // ============================================================
+        
+        let currentContextRepo = null;
+        const contextMenu = document.getElementById('context-menu');
+        
+        function showContextMenu(event) {
+            // Get the repo under cursor
+            if (!tagSprites.length) return;
+            
+            const mouse = new THREE.Vector2();
+            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+            mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+            
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(tagSprites);
+            
+            if (intersects.length > 0 && intersects[0].object.userData && intersects[0].object.userData.repo) {
+                currentContextRepo = intersects[0].object.userData.repo;
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = event.clientX + 'px';
+                contextMenu.style.top = event.clientY + 'px';
+                
+                // Hide after 5 seconds or on click elsewhere
+                setTimeout(() => {
+                    contextMenu.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        document.getElementById('menu-copy-name').addEventListener('click', () => {
+            if (currentContextRepo) {
+                navigator.clipboard.writeText(currentContextRepo.name);
+                contextMenu.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('menu-copy-url').addEventListener('click', () => {
+            if (currentContextRepo) {
+                navigator.clipboard.writeText(currentContextRepo.url);
+                contextMenu.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('menu-open-new').addEventListener('click', () => {
+            if (currentContextRepo) {
+                window.open(currentContextRepo.url, '_blank');
+                contextMenu.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('menu-show-related').addEventListener('click', () => {
+            if (currentContextRepo) {
+                drawRelationshipLines(currentContextRepo);
+                contextMenu.style.display = 'none';
+                // Show notification
+                const related = findRelatedRepos(currentContextRepo, allRepos);
+                tooltipDiv.style.display = 'block';
+                tooltipDiv.innerHTML = `<strong>🔗 Found ${related.length} related repos</strong><br>Connections shown with colored lines`;
+                setTimeout(() => { tooltipDiv.style.display = 'none'; }, 3000);
+            }
+        });
+        
+        // Hide context menu on click elsewhere
+        document.addEventListener('click', () => {
+            contextMenu.style.display = 'none';
+        });
         
         function attachClickHandler() {
             const raycaster = new THREE.Raycaster();
@@ -369,17 +554,36 @@
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(tagSprites);
                 
-                // FIX: Check if intersects exists and has userData with repo
                 if (intersects.length > 0 && intersects[0].object && intersects[0].object.userData && intersects[0].object.userData.repo) {
                     const repo = intersects[0].object.userData.repo;
+                    const related = findRelatedRepos(repo, allRepos);
+                    
                     tooltipDiv.style.display = 'block';
-                    tooltipDiv.innerHTML = `<strong>${repo.name}</strong><br>📝 ${repo.language}<br>⭐ ${repo.stars} stars<br>📅 ${repo.date}`;
+                    let relatedHtml = '';
+                    if (related.length > 0) {
+                        relatedHtml = `<div class="related-links">
+                            <strong>🔗 Related (${related.length}):</strong><br>
+                            ${related.map(r => `<a href="${r.url}" target="_blank">${r.name.length > 20 ? r.name.slice(0,18)+'..' : r.name}</a>`).join('')}
+                        </div>`;
+                    }
+                    tooltipDiv.innerHTML = `<strong>${repo.name}</strong><br>📝 ${repo.language}<br>⭐ ${repo.stars} stars<br>📅 ${repo.date}${relatedHtml}`;
                     tooltipDiv.style.left = (event.clientX + 15) + 'px';
                     tooltipDiv.style.top = (event.clientY - 50) + 'px';
                     canvas.style.cursor = 'pointer';
+                    
+                    // Draw relationship lines when hovering
+                    if (currentHoveredRepo !== repo) {
+                        currentHoveredRepo = repo;
+                        drawRelationshipLines(repo);
+                    }
                 } else {
                     tooltipDiv.style.display = 'none';
                     canvas.style.cursor = 'default';
+                    // Clear relationship lines when not hovering
+                    if (currentHoveredRepo !== null) {
+                        currentHoveredRepo = null;
+                        drawRelationshipLines(null);
+                    }
                 }
             };
             
@@ -392,11 +596,9 @@
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(tagSprites);
                 
-                // FIX: Only open if we have valid repo data
                 if (intersects.length > 0 && intersects[0].object && intersects[0].object.userData && intersects[0].object.userData.repo) {
                     const repo = intersects[0].object.userData.repo;
                     if (repo && repo.url) {
-                        console.log('Opening:', repo.name, repo.url);
                         window.open(repo.url, '_blank');
                     }
                 }
@@ -409,11 +611,10 @@
         }
         
         function createTagCloud() {
-            // Remove old sprites
-            tagSprites.forEach(sprite => {
-                if (scene) scene.remove(sprite);
-            });
+            tagSprites.forEach(sprite => { if (scene) scene.remove(sprite); });
             tagSprites = [];
+            relationshipLines.forEach(line => scene.remove(line));
+            relationshipLines = [];
             
             let filteredRepos = allRepos;
             if (currentFilter) {
@@ -432,7 +633,6 @@
                 return;
             }
             
-            // Fibonacci sphere distribution
             const radius = 5.8;
             const goldenRatio = (1 + Math.sqrt(5)) / 2;
             
@@ -444,7 +644,6 @@
                 const y = Math.sin(phi) * Math.sin(theta) * radius * 0.7;
                 const z = Math.cos(phi) * radius;
                 
-                // Create canvas texture
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 canvas.width = 512;
@@ -459,9 +658,7 @@
                 ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
                 
                 let displayName = repo.name;
-                if (displayName.length > 28) {
-                    displayName = displayName.slice(0, 25) + '...';
-                }
+                if (displayName.length > 28) displayName = displayName.slice(0, 25) + '...';
                 
                 ctx.font = `600 ${Math.min(30, 22 + Math.floor(repo.stars / 4))}px 'Inter', system-ui`;
                 ctx.fillStyle = '#ffffff';
@@ -478,7 +675,6 @@
                 const sprite = new THREE.Sprite(material);
                 sprite.scale.set(2.8, 0.65, 1);
                 sprite.position.set(x, y, z);
-                // CRITICAL: Ensure userData.repo is set
                 sprite.userData = { repo: repo };
                 
                 scene.add(sprite);
@@ -488,7 +684,6 @@
             attachClickHandler();
         }
         
-        // Search functionality
         const searchInput = document.getElementById('search-input');
         const clearBtn = document.getElementById('clear-search');
         
@@ -510,100 +705,3 @@
     </script>
 </body>
 </html>
-    <script type="module">
-        // ============================================================
-        // CONSOLE ERROR CAPTURE - Send errors to PostgreSQL database
-        // ============================================================
-        
-        // Generate a session ID for this browser session
-        let sessionId = localStorage.getItem('error_session_id');
-        if (!sessionId) {
-            sessionId = crypto.randomUUID ? crypto.randomUUID() : 
-                'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                    const r = Math.random() * 16 | 0;
-                    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                    return v.toString(16);
-                });
-            localStorage.setItem('error_session_id', sessionId);
-        }
-        
-        // Override console.error to capture and log errors
-        const originalConsoleError = console.error;
-        console.error = function(...args) {
-            // Call original console.error first
-            originalConsoleError.apply(console, args);
-            
-            // Format the error for logging
-            const errorMessage = args.map(arg => {
-                if (arg instanceof Error) return arg.message;
-                if (typeof arg === 'object') return JSON.stringify(arg);
-                return String(arg);
-            }).join(' ');
-            
-            const errorStack = args[0] instanceof Error ? args[0].stack : null;
-            
-            // Send to backend
-            fetch('/api/log-error', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    error_message: errorMessage,
-                    error_stack: errorStack,
-                    error_type: 'ConsoleError',
-                    url: window.location.href,
-                    session_id: sessionId,
-                    repo_context: {
-                        filter: currentFilter || null,
-                        visible_count: document.getElementById('visible-count')?.textContent || null,
-                        total_count: allRepos.length
-                    }
-                })
-            }).catch(e => console.warn('Failed to log error to server:', e));
-        };
-        
-        // Capture unhandled promise rejections
-        window.addEventListener('unhandledrejection', (event) => {
-            const error = event.reason;
-            fetch('/api/log-error', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    error_message: error?.message || String(error),
-                    error_stack: error?.stack || null,
-                    error_type: 'UnhandledPromiseRejection',
-                    url: window.location.href,
-                    session_id: sessionId,
-                    repo_context: {
-                        filter: currentFilter || null
-                    }
-                })
-            }).catch(e => console.warn('Failed to log unhandled rejection:', e));
-        });
-        
-        // Capture window errors
-        window.addEventListener('error', (event) => {
-            fetch('/api/log-error', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    error_message: event.message,
-                    error_stack: `${event.filename}:${event.lineno}:${event.colno}\n${event.error?.stack || ''}`,
-                    error_type: 'WindowError',
-                    url: window.location.href,
-                    session_id: sessionId
-                })
-            }).catch(e => console.warn('Failed to log window error:', e));
-        });
-        
-        // Log page load
-        fetch('/api/log-error', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                error_message: 'Page loaded successfully',
-                error_type: 'Info',
-                url: window.location.href,
-                session_id: sessionId
-            })
-        }).catch(() => {});
-    </script>
