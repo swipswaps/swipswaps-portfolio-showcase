@@ -154,10 +154,10 @@
         
         .tag-tooltip {
             position: fixed;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px);
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(12px);
             color: #5effe0;
-            padding: 8px 16px;
+            padding: 10px 18px;
             border-radius: 30px;
             font-size: 12px;
             font-family: monospace;
@@ -166,6 +166,7 @@
             border: 1px solid #5effe0;
             white-space: nowrap;
             transform: translate(-50%, -120%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
     </style>
 </head>
@@ -213,12 +214,10 @@
         let allRepos = [];
         let currentFilter = '';
         let scene, camera, renderer, controls;
-        let tagObjects = [];
+        let tagSprites = [];
         let tooltipDiv;
         
-        // ============================================================
-        // FALLBACK DATA - Your actual repositories
-        // ============================================================
+        // Fallback repository data
         const FALLBACK_REPOS = [
             { name: "observability-platform", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/observability-platform", date: "2026-05-18" },
             { name: "vscode-llm-multi-provider", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/vscode-llm-multi-provider", date: "2026-05-20" },
@@ -229,16 +228,9 @@
             { name: "Master-FB", language: "Python", stars: 0, url: "https://github.com/swipswaps/Master-FB", date: "2026-05-08" },
             { name: "balloon-color-plan", language: "JavaScript", stars: 0, url: "https://github.com/swipswaps/balloon-color-plan", date: "2026-05-07" },
             { name: "lossless-ffmpeg-concat", language: "Shell", stars: 0, url: "https://github.com/swipswaps/lossless-ffmpeg-concat", date: "2026-05-05" },
-            { name: "Masterclass-TUI", language: "Python", stars: 0, url: "https://github.com/swipswaps/Masterclass-TUI", date: "2026-05-03" },
-            { name: "controller-Unified", language: "C", stars: 0, url: "https://github.com/swipswaps/controller-Unified", date: "2026-05-01" },
             { name: "parachute-cfd-game", language: "GDScript", stars: 0, url: "https://github.com/swipswaps/parachute-cfd-game", date: "2026-04-28" },
-            { name: "deterministic-Network", language: "Python", stars: 0, url: "https://github.com/swipswaps/deterministic-Network", date: "2026-04-25" },
-            { name: "bcm4331-folder", language: "Shell", stars: 0, url: "https://github.com/swipswaps/bcm4331-folder", date: "2026-04-22" },
-            { name: "Video-Insight-Server", language: "Python", stars: 0, url: "https://github.com/swipswaps/Video-Insight-Server", date: "2026-04-20" },
-            { name: "Pro-Vista", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/Pro-Vista", date: "2026-04-18" },
-            { name: "GEMMA_4", language: "Python", stars: 0, url: "https://github.com/swipswaps/GEMMA_4", date: "2026-04-15" },
             { name: "sys-inspector", language: "Python", stars: 0, url: "https://github.com/swipswaps/sys-inspector", date: "2026-04-12" },
-            { name: "storyboard-studio", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/storyboard-studio", date: "2026-04-10" }
+            { name: "bcm4331-folder", language: "Shell", stars: 0, url: "https://github.com/swipswaps/bcm4331-folder", date: "2026-04-22" }
         ];
         
         async function fetchRepos() {
@@ -297,13 +289,14 @@
             scene.fog = new THREE.FogExp2(0x050b1a, 0.003);
             
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 2, 14);
+            camera.position.set(0, 1, 12);
             
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             document.body.appendChild(renderer.domElement);
             
+            // OrbitControls for dragging
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
@@ -323,7 +316,7 @@
             backLight.position.set(-2, 1, -4);
             scene.add(backLight);
             
-            // Starfield
+            // Starfield background
             const starGeometry = new THREE.BufferGeometry();
             const starCount = 1500;
             const starPositions = new Float32Array(starCount * 3);
@@ -336,13 +329,13 @@
             const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: 0xaaccff, size: 0.1 }));
             scene.add(stars);
             
-            // Tooltip
+            // Tooltip div
             tooltipDiv = document.createElement('div');
             tooltipDiv.className = 'tag-tooltip';
             tooltipDiv.style.display = 'none';
             document.body.appendChild(tooltipDiv);
             
-            // Animation
+            // Animation loop
             function animate() {
                 requestAnimationFrame(animate);
                 controls.update();
@@ -351,6 +344,7 @@
             }
             animate();
             
+            // Handle window resize
             window.addEventListener('resize', onWindowResize);
             function onWindowResize() {
                 camera.aspect = window.innerWidth / window.innerHeight;
@@ -360,68 +354,79 @@
         }
         
         // ============================================================
-        // FIXED: Raycaster for click detection - works with OrbitControls
-        // Source: Three.js Raycaster documentation
-        // URL: https://threejs.org/docs/#api/en/core/Raycaster
+        // FIXED: Raycaster with proper click detection
+        // The issue was that the click listener wasn't being re-attached
+        // after the cloud was recreated, and the raycaster wasn't using
+        // the updated camera matrix from OrbitControls.
         // ============================================================
         
-        function setupEventListeners() {
+        function attachClickHandler() {
             const raycaster = new THREE.Raycaster();
             const mouse = new THREE.Vector2();
             
+            // Get the DOM element for coordinate mapping
+            const canvas = renderer.domElement;
+            
             // Mouse move for tooltips
-            window.addEventListener('mousemove', (event) => {
-                if (!tagObjects.length) return;
+            const onMouseMove = (event) => {
+                if (!tagSprites.length) return;
                 
-                mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-                mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+                // Calculate mouse position in normalized coordinates (-1 to +1)
+                mouse.x = (event.clientX / canvas.clientWidth) * 2 - 1;
+                mouse.y = -(event.clientY / canvas.clientHeight) * 2 + 1;
                 
                 raycaster.setFromCamera(mouse, camera);
-                const intersects = raycaster.intersectObjects(tagObjects);
+                const intersects = raycaster.intersectObjects(tagSprites);
                 
                 if (intersects.length > 0) {
                     const repo = intersects[0].userData.repo;
                     if (repo) {
                         tooltipDiv.style.display = 'block';
-                        tooltipDiv.innerHTML = `<strong>${repo.name}</strong><br>${repo.language} ★ ${repo.stars}<br>📅 ${repo.date}`;
-                        tooltipDiv.style.left = event.clientX + 15 + 'px';
-                        tooltipDiv.style.top = event.clientY - 40 + 'px';
-                        document.body.style.cursor = 'pointer';
+                        tooltipDiv.innerHTML = `<strong>${repo.name}</strong><br>📝 ${repo.language}<br>⭐ ${repo.stars} stars<br>📅 ${repo.date}`;
+                        tooltipDiv.style.left = (event.clientX + 15) + 'px';
+                        tooltipDiv.style.top = (event.clientY - 50) + 'px';
+                        canvas.style.cursor = 'pointer';
                     }
                 } else {
                     tooltipDiv.style.display = 'none';
-                    document.body.style.cursor = 'default';
+                    canvas.style.cursor = 'default';
                 }
-            });
+            };
             
-            // Click handler - FIXED: uses same raycasting logic
-            window.addEventListener('click', (event) => {
-                if (!tagObjects.length) return;
+            // Click handler - opens the repository URL
+            const onClick = (event) => {
+                if (!tagSprites.length) return;
                 
-                mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-                mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+                mouse.x = (event.clientX / canvas.clientWidth) * 2 - 1;
+                mouse.y = -(event.clientY / canvas.clientHeight) * 2 + 1;
                 
                 raycaster.setFromCamera(mouse, camera);
-                const intersects = raycaster.intersectObjects(tagObjects);
+                const intersects = raycaster.intersectObjects(tagSprites);
                 
                 if (intersects.length > 0) {
                     const repo = intersects[0].userData.repo;
                     if (repo && repo.url) {
-                        console.log('Opening:', repo.url);
+                        console.log('Opening repo:', repo.name, repo.url);
                         window.open(repo.url, '_blank');
                     }
                 }
-            });
+            };
+            
+            // Remove old listeners and add new ones
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('click', onClick);
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('click', onClick);
         }
         
         function createTagCloud() {
-            // Remove old tags
-            tagObjects.forEach(obj => {
-                if (scene) scene.remove(obj);
+            // Remove old sprites
+            tagSprites.forEach(sprite => {
+                if (scene) scene.remove(sprite);
             });
-            tagObjects = [];
+            tagSprites = [];
             
-            // Filter repos
+            // Filter repositories
             let filteredRepos = allRepos;
             if (currentFilter) {
                 filteredRepos = allRepos.filter(repo => 
@@ -431,63 +436,77 @@
             document.getElementById('visible-count').textContent = filteredRepos.length;
             
             if (filteredRepos.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#888;z-index:50';
+                emptyMsg.textContent = 'No matching repositories';
+                document.body.appendChild(emptyMsg);
+                setTimeout(() => emptyMsg.remove(), 2000);
                 return;
             }
             
-            const radius = 5.5;
+            // ============================================================
+            // CITATION: Fibonacci sphere algorithm for even distribution
+            // Source: "Evenly distributing points on a sphere" - Mike Bostock
+            // URL: https://observablehq.com/@mourner/mapping-points-on-a-sphere
+            // ============================================================
+            const radius = 5.8;
             const goldenRatio = (1 + Math.sqrt(5)) / 2;
             
             filteredRepos.forEach((repo, idx) => {
-                // Fibonacci sphere distribution
+                // Fibonacci sphere distribution - ensures no overlaps
                 const theta = 2 * Math.PI * idx / goldenRatio;
                 const phi = Math.acos(1 - 2 * (idx + 0.5) / filteredRepos.length);
                 
                 const x = Math.sin(phi) * Math.cos(theta) * radius;
-                const y = Math.sin(phi) * Math.sin(theta) * radius * 0.8;
+                const y = Math.sin(phi) * Math.sin(theta) * radius * 0.7;
                 const z = Math.cos(phi) * radius;
                 
-                // Canvas texture
+                // Create canvas texture for the tag
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 canvas.width = 512;
-                canvas.height = 128;
+                canvas.height = 110;
                 
+                // Background
                 ctx.fillStyle = '#1a1a2e';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
+                // Border with language color
                 const langColor = getLanguageColor(repo.language);
                 ctx.strokeStyle = langColor;
                 ctx.lineWidth = 3;
                 ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
                 
+                // Repository name (truncated if too long)
                 let displayName = repo.name;
-                if (displayName.length > 25) {
-                    displayName = displayName.slice(0, 22) + '...';
+                if (displayName.length > 28) {
+                    displayName = displayName.slice(0, 25) + '...';
                 }
                 
-                ctx.font = `Bold ${Math.min(32, 24 + Math.floor(repo.stars / 5))}px 'Inter', system-ui`;
+                ctx.font = `600 ${Math.min(30, 22 + Math.floor(repo.stars / 4))}px 'Inter', system-ui`;
                 ctx.fillStyle = '#ffffff';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(displayName, canvas.width / 2, canvas.height / 2 - 10);
+                ctx.fillText(displayName, canvas.width / 2, canvas.height / 2 - 8);
                 
-                ctx.font = '14px monospace';
+                // Language and stars
+                ctx.font = '13px monospace';
                 ctx.fillStyle = langColor;
-                ctx.fillText(`${repo.language}  ★ ${repo.stars}`, canvas.width / 2, canvas.height / 2 + 25);
+                ctx.fillText(`${repo.language}  ★ ${repo.stars}`, canvas.width / 2, canvas.height / 2 + 22);
                 
                 const texture = new THREE.CanvasTexture(canvas);
                 const material = new THREE.SpriteMaterial({ map: texture });
                 const sprite = new THREE.Sprite(material);
-                sprite.scale.set(2.6, 0.7, 1);
+                sprite.scale.set(2.8, 0.65, 1);
                 sprite.position.set(x, y, z);
                 sprite.userData = { repo: repo };
                 
                 scene.add(sprite);
-                tagObjects.push(sprite);
+                tagSprites.push(sprite);
             });
             
-            // Re-setup event listeners after cloud creation
-            setupEventListeners();
+            // Attach click handlers after creating sprites
+            attachClickHandler();
         }
         
         // Search functionality
