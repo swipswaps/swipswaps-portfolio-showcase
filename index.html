@@ -4,12 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>swipswaps · AI Reliability Engineer · 3D Portfolio</title>
-    <meta name="description" content="Jose Melendez (swipswaps) - DevOps Data Scientist & AI-Augmented Reliability Engineer. Self-healing systems, observability, Linux forensics, physics simulation.">
-    <meta name="author" content="Jose Melendez">
-    <meta property="og:title" content="swipswaps · AI Reliability Engineer Portfolio">
-    <meta property="og:description" content="3D visualization of GitHub repositories - self-healing systems, observability, and AI-augmented development.">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary_large_image">
+    <meta name="description" content="Jose Melendez - DevOps Data Scientist & AI-Augmented Reliability Engineer">
     <style>
         * {
             margin: 0;
@@ -20,86 +15,76 @@
         body {
             margin: 0;
             overflow: hidden;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
         
-        /* Main Info Panel - More readable, better contrast */
+        /* Main Info Panel - Clear, readable */
         #info-panel {
             position: absolute;
             bottom: 24px;
             left: 24px;
             right: 24px;
-            background: rgba(8, 12, 20, 0.92);
-            backdrop-filter: blur(16px);
-            border-radius: 20px;
+            background: rgba(8, 12, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
             padding: 20px 28px;
             color: #e8edf5;
-            border: 1px solid rgba(0, 255, 200, 0.25);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            border: 1px solid rgba(0, 255, 200, 0.35);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             pointer-events: none;
             z-index: 20;
-            transition: opacity 0.2s ease;
         }
         
         #info-title {
-            font-size: 1.35rem;
+            font-size: 1.3rem;
             font-weight: 700;
             margin-bottom: 8px;
             color: #5effe0;
-            letter-spacing: -0.3px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
         }
         
         .badge {
             font-size: 0.7rem;
             background: rgba(94, 255, 224, 0.2);
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 40px;
             font-weight: 500;
             color: #5effe0;
-            letter-spacing: normal;
         }
         
         #info-desc {
             font-size: 0.9rem;
-            opacity: 0.85;
+            opacity: 0.9;
             line-height: 1.5;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         
         .repo-stats {
             display: flex;
-            gap: 20px;
+            gap: 28px;
             flex-wrap: wrap;
-            margin-top: 8px;
-            font-size: 0.75rem;
+            margin-top: 10px;
+            font-size: 0.8rem;
             font-family: monospace;
             color: #88aacc;
-        }
-        
-        .repo-stats span {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
         }
         
         .controls-note {
             position: absolute;
             bottom: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.55);
+            background: rgba(0,0,0,0.6);
             padding: 6px 14px;
             border-radius: 30px;
             font-size: 11px;
-            color: #aaa;
-            font-family: monospace;
+            color: #ccc;
             backdrop-filter: blur(4px);
             pointer-events: none;
             z-index: 20;
-            letter-spacing: 0.3px;
+            font-family: monospace;
         }
         
         #loader {
@@ -107,8 +92,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(12px);
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(16px);
             padding: 16px 32px;
             border-radius: 60px;
             color: #5effe0;
@@ -117,21 +102,19 @@
             z-index: 100;
             pointer-events: none;
             transition: opacity 0.4s ease;
-            border: 1px solid rgba(94,255,224,0.4);
+            border: 1px solid rgba(94,255,224,0.5);
             font-weight: 500;
-            letter-spacing: 0.5px;
             white-space: nowrap;
         }
         
-        /* Header with name and role - always visible top-left */
         .identity-header {
             position: absolute;
             top: 24px;
             left: 24px;
-            background: rgba(8, 12, 20, 0.75);
+            background: rgba(8, 12, 20, 0.85);
             backdrop-filter: blur(12px);
-            padding: 10px 20px;
-            border-radius: 40px;
+            padding: 12px 24px;
+            border-radius: 48px;
             z-index: 20;
             pointer-events: none;
             border-left: 3px solid #5effe0;
@@ -141,13 +124,12 @@
             font-size: 1.1rem;
             font-weight: 600;
             color: white;
-            letter-spacing: -0.2px;
         }
         
         .identity-header p {
             font-size: 0.7rem;
             color: #88aacc;
-            margin-top: 2px;
+            margin-top: 3px;
         }
         
         .social-links {
@@ -161,15 +143,16 @@
         }
         
         .social-links a {
-            color: #aaa;
+            color: #ccc;
             text-decoration: none;
             font-size: 13px;
-            background: rgba(8, 12, 20, 0.7);
+            font-weight: 500;
+            background: rgba(8, 12, 20, 0.85);
             backdrop-filter: blur(8px);
-            padding: 8px 16px;
+            padding: 8px 18px;
             border-radius: 40px;
             transition: all 0.2s;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
         }
         
         .social-links a:hover {
@@ -181,20 +164,19 @@
         @media (max-width: 700px) {
             #info-panel { padding: 14px 18px; bottom: 16px; left: 16px; right: 16px; }
             #info-title { font-size: 1rem; }
-            .identity-header { top: 16px; left: 16px; padding: 6px 14px; }
+            .identity-header { top: 16px; left: 16px; padding: 8px 16px; }
             .identity-header h1 { font-size: 0.9rem; }
             .social-links { top: 16px; right: 16px; gap: 8px; }
-            .social-links a { padding: 5px 12px; font-size: 11px; }
+            .social-links a { padding: 6px 12px; font-size: 11px; }
             .controls-note { bottom: 12px; right: 12px; font-size: 9px; }
-            #loader { white-space: normal; text-align: center; padding: 12px 20px; font-size: 12px; }
+            #loader { white-space: normal; text-align: center; padding: 10px 18px; font-size: 11px; }
         }
         
-        /* Tooltip style for additional info */
         .status-badge {
             position: absolute;
             bottom: 80px;
             right: 24px;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.55);
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 10px;
@@ -203,43 +185,35 @@
             pointer-events: none;
             z-index: 20;
         }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
     </style>
 </head>
 <body>
-    <!-- Persistent Identity Header -->
     <div class="identity-header">
         <h1>José Melendez</h1>
         <p>DevOps Data Scientist · AI-Augmented Reliability Engineer</p>
     </div>
     
-    <!-- Social Links -->
     <div class="social-links">
         <a href="https://github.com/swipswaps" target="_blank">GitHub</a>
         <a href="https://x.com/swipswaps" target="_blank">X/Twitter</a>
     </div>
     
-    <!-- Main Info Panel - updates on hover -->
     <div id="info-panel">
         <div id="info-title">
             ✨ swipswaps Portfolio
             <span class="badge" id="live-badge">Loading...</span>
         </div>
         <div id="info-desc">
-            Hover over any glowing repository bubble to see details. Click to open on GitHub.<br>
-            <strong>Self-Healing Systems · Observability · Linux Forensics · AI Tooling</strong>
+            <strong>Self-Healing Systems · Observability · Linux Forensics · AI Tooling</strong><br>
+            Hover over any bubble → details here. Click to open repository on GitHub.
         </div>
         <div class="repo-stats">
             <span>📦 <span id="repo-count">—</span> repositories</span>
             <span>⭐ <span id="star-count">—</span> total stars</span>
-            <span>🕐 timeline: last 30 days</span>
+            <span>🕐 sorted by last push date</span>
         </div>
     </div>
-    <div class="controls-note">🖱️ Drag to orbit • Scroll to zoom • Click on bubbles</div>
+    <div class="controls-note">🖱️ Drag to rotate • Scroll to zoom • Click on any bubble</div>
     <div class="status-badge" id="status-badge">🌐 fetching live data...</div>
     <div id="loader">🌀 loading 3D portfolio visualization...</div>
 
@@ -253,12 +227,6 @@
     </script>
 
     <script type="module">
-        // --------------------------------------------------------------
-        // SWIPSWAPS 3D PORTFOLIO - REPOSITORY TIMELINE WORD CLOUD
-        // Purpose: Showcase AI-augmented reliability engineering work
-        // Author: Jose Melendez (@swipswaps)
-        // --------------------------------------------------------------
-        
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
@@ -270,7 +238,6 @@
         let repositories = [];
         let usingLiveData = false;
         
-        // Update UI elements
         function updateUIStats() {
             const countEl = document.getElementById('repo-count');
             const starEl = document.getElementById('star-count');
@@ -283,11 +250,11 @@
                 starEl.textContent = totalStars;
             }
             if (badgeEl) {
-                badgeEl.textContent = usingLiveData ? '✓ Live GitHub API' : '📦 Sample Data';
+                badgeEl.textContent = usingLiveData ? '✓ Live GitHub API' : '📦 Sample Data (API limit)';
                 badgeEl.style.color = usingLiveData ? '#5effe0' : '#ffaa44';
             }
             if (statusEl) {
-                statusEl.textContent = usingLiveData ? '✅ live data' : '📦 fallback mode (API rate limit)';
+                statusEl.textContent = usingLiveData ? '✅ connected to GitHub API' : '📦 using local fallback data';
                 statusEl.style.color = usingLiveData ? '#5effe0' : '#ffaa44';
             }
         }
@@ -316,7 +283,7 @@
                 }
                 throw new Error(`API returned ${response.status}`);
             } catch (err) {
-                console.warn('GitHub API failed, using fallback data:', err);
+                console.warn('GitHub API failed, using fallback');
                 const fallbackResp = await fetch(FALLBACK_URL);
                 const fallbackData = await fallbackResp.json();
                 repositories = fallbackData;
@@ -327,16 +294,14 @@
             }
         }
         
-        // --------------------------------------------------------------
-        // SCENE SETUP
-        // --------------------------------------------------------------
+        // Scene setup
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x050b1a);
-        scene.fog = new THREE.FogExp2(0x050b1a, 0.006);
+        scene.fog = new THREE.FogExp2(0x050b1a, 0.005);
         
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(6, 5, 14);
-        camera.lookAt(0, 0, -1);
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(8, 5, 18);
+        camera.lookAt(0, 0, 0);
         
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -353,92 +318,73 @@
         
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.dampingFactor = 0.06;
+        controls.dampingFactor = 0.08;
         controls.autoRotate = false;
         controls.enableZoom = true;
-        controls.zoomSpeed = 1.0;
-        controls.rotateSpeed = 0.8;
+        controls.zoomSpeed = 1.2;
+        controls.rotateSpeed = 0.9;
         controls.target.set(0, 0.5, 0);
         
         // Lighting
         const ambient = new THREE.AmbientLight(0x1a1a2e);
         scene.add(ambient);
-        const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
-        mainLight.position.set(3, 5, 4);
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1.3);
+        mainLight.position.set(5, 8, 6);
         scene.add(mainLight);
-        const backLight = new THREE.PointLight(0x3366aa, 0.5);
-        backLight.position.set(-2, 1, -3);
+        const backLight = new THREE.PointLight(0x4488ff, 0.5);
+        backLight.position.set(-3, 2, -4);
         scene.add(backLight);
-        const fillLight = new THREE.PointLight(0x55aaff, 0.3);
-        fillLight.position.set(1, 2, 2);
+        const fillLight = new THREE.PointLight(0x88aaff, 0.3);
+        fillLight.position.set(2, 1, 3);
         scene.add(fillLight);
         
-        // Decorative grid
-        const gridHelper = new THREE.GridHelper(22, 24, 0x44aaff, 0x226699);
-        gridHelper.position.y = -2.5;
+        // Grid reference
+        const gridHelper = new THREE.GridHelper(28, 24, 0x44aaff, 0x226699);
+        gridHelper.position.y = -3;
         gridHelper.material.transparent = true;
-        gridHelper.material.opacity = 0.3;
+        gridHelper.material.opacity = 0.2;
         scene.add(gridHelper);
         
-        // Starfield
-        const starGeometry = new THREE.BufferGeometry();
-        const starCount = 1500;
-        const starPositions = new Float32Array(starCount * 3);
-        for (let i = 0; i < starCount; i++) {
+        // Stars
+        const starGeo = new THREE.BufferGeometry();
+        const starPositions = new Float32Array(1500 * 3);
+        for (let i = 0; i < 1500; i++) {
             starPositions[i*3] = (Math.random() - 0.5) * 200;
-            starPositions[i*3+1] = (Math.random() - 0.5) * 80;
-            starPositions[i*3+2] = (Math.random() - 0.5) * 100 - 40;
+            starPositions[i*3+1] = (Math.random() - 0.5) * 100;
+            starPositions[i*3+2] = (Math.random() - 0.5) * 120 - 50;
         }
-        starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-        const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: 0xaaccff, size: 0.1, transparent: true, opacity: 0.6 }));
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xaaccff, size: 0.1, transparent: true, opacity: 0.5 }));
         scene.add(stars);
         
-        // Central glow element (represents self-healing core)
+        // Central decorative element
         const coreGlow = new THREE.Mesh(
             new THREE.IcosahedronGeometry(0.9, 1),
-            new THREE.MeshStandardMaterial({ color: 0x5effe0, emissive: 0x33bbaa, emissiveIntensity: 0.9, roughness: 0.2, metalness: 0.8 })
+            new THREE.MeshStandardMaterial({ color: 0x5effe0, emissive: 0x33bbaa, emissiveIntensity: 0.7, roughness: 0.3 })
         );
-        coreGlow.position.set(0, 0.3, -1.5);
+        coreGlow.position.set(0, 0.2, -2);
         scene.add(coreGlow);
         
-        // Floating particles around core
+        const ring = new THREE.Mesh(
+            new THREE.TorusGeometry(4, 0.06, 64, 300),
+            new THREE.MeshStandardMaterial({ color: 0x33ddcc, emissive: 0x118877, emissiveIntensity: 0.25 })
+        );
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = -1.8;
+        scene.add(ring);
+        
+        // Floating particles
         const particleCount = 600;
-        const particleGeo = new THREE.BufferGeometry();
         const particlePositions = [];
         for (let i = 0; i < particleCount; i++) {
             const angle = (i / particleCount) * Math.PI * 2;
-            const radius = 1.6;
-            particlePositions.push(Math.cos(angle) * radius, Math.sin(angle) * radius + 0.3, -1.5);
+            particlePositions.push(Math.cos(angle) * 1.8, Math.sin(angle) * 1.8 + 0.3, -2);
         }
+        const particleGeo = new THREE.BufferGeometry();
         particleGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(particlePositions), 3));
-        const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({ color: 0x88ffcc, size: 0.06 }));
+        const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({ color: 0x88ffcc, size: 0.07 }));
         scene.add(particles);
         
-        // Decorative rings
-        const ring1 = new THREE.Mesh(
-            new THREE.TorusGeometry(3.2, 0.06, 64, 300),
-            new THREE.MeshStandardMaterial({ color: 0x33ddcc, emissive: 0x118877, emissiveIntensity: 0.3 })
-        );
-        ring1.rotation.x = Math.PI / 2;
-        ring1.position.y = -1.2;
-        scene.add(ring1);
-        
-        // Dust particles for ambiance
-        const dustCount = 1000;
-        const dustGeo = new THREE.BufferGeometry();
-        const dustPositions = new Float32Array(dustCount * 3);
-        for (let i = 0; i < dustCount; i++) {
-            dustPositions[i*3] = (Math.random() - 0.5) * 22;
-            dustPositions[i*3+1] = (Math.random() - 0.5) * 12;
-            dustPositions[i*3+2] = (Math.random() - 0.5) * 25 - 8;
-        }
-        dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
-        const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: 0x77aaff, size: 0.04, transparent: true, opacity: 0.35 }));
-        scene.add(dust);
-        
-        // --------------------------------------------------------------
-        // WORD CLOUD
-        // --------------------------------------------------------------
         let wordGroup = [];
         const cloudContainer = new THREE.Group();
         scene.add(cloudContainer);
@@ -448,9 +394,14 @@
                 'JavaScript': '#f7df1e', 'TypeScript': '#3178c6', 'Python': '#3572A5',
                 'Shell': '#89e051', 'HTML': '#e34c26', 'CSS': '#563d7c',
                 'GDScript': '#478cbf', 'Go': '#00ADD8', 'Rust': '#dea584',
-                'Jupyter Notebook': '#da5b0b', 'Unknown': '#888888'
+                'Unknown': '#888888'
             };
             return colors[lang] || '#44aaff';
+        }
+        
+        function truncateName(name, maxLen = 20) {
+            if (name.length <= maxLen) return name;
+            return name.slice(0, maxLen - 2) + '..';
         }
         
         function createWordCloud() {
@@ -460,72 +411,76 @@
                 new Date(a.pushed_at) - new Date(b.pushed_at)
             );
             
-            const minDate = new Date(sorted[0].pushed_at);
-            const maxDate = new Date(sorted[sorted.length-1].pushed_at);
-            const dateRange = maxDate - minDate;
-            const rangeSafe = dateRange === 0 ? 1 : dateRange;
+            const numRepos = sorted.length;
             
+            // Use a cylindrical/spiral layout that spreads labels evenly
             sorted.forEach((repo, idx) => {
-                const t = (new Date(repo.pushed_at) - minDate) / rangeSafe;
-                const posZ = -6 + (t * 12);
+                // Angle around Y axis - evenly distributed
+                const angle = (idx / numRepos) * Math.PI * 2;
+                // Radius - increases slightly with index for spiral effect
+                const radius = 4.5;
+                // Height - spread vertically to prevent overlap
+                const height = Math.sin(angle * 2) * 1.2 + (idx / numRepos) * 2.5 - 1.2;
                 
-                // Spiral distribution for better visibility
-                const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-                const theta = idx * goldenAngle;
-                const radius = 3.5 * Math.sqrt(idx / sorted.length);
-                const posX = Math.cos(theta) * radius;
-                const posY = Math.sin(theta) * 1.0 + (Math.sin(idx * 0.7) * 0.3);
+                const posX = Math.cos(angle) * radius;
+                const posZ = Math.sin(angle) * radius;
+                const posY = height;
                 
                 const repoColor = getLanguageColor(repo.language);
-                const starBonus = Math.min(0.25, Math.log10(repo.stargazers_count + 1) * 0.06);
-                const scaleVal = 0.8 + t * 0.45 + starBonus;
+                const starBonus = Math.min(0.2, Math.log10(repo.stargazers_count + 1) * 0.05);
+                const scaleVal = 0.75 + starBonus;
                 
                 // Sphere
                 const sphereMat = new THREE.MeshStandardMaterial({
                     color: repoColor,
                     emissive: repoColor,
-                    emissiveIntensity: 0.3,
-                    roughness: 0.4,
+                    emissiveIntensity: 0.4,
+                    roughness: 0.35,
                     metalness: 0.6,
                     transparent: true,
-                    opacity: 0.75
+                    opacity: 0.85
                 });
-                const sphere = new THREE.Mesh(new THREE.SphereGeometry(scaleVal * 0.45, 32, 32), sphereMat);
+                const sphere = new THREE.Mesh(new THREE.SphereGeometry(scaleVal * 0.5, 32, 32), sphereMat);
                 sphere.position.set(posX, posY, posZ);
-                sphere.userData = { repo, type: 'repo' };
+                sphere.userData = { repo };
                 cloudContainer.add(sphere);
                 
-                // CSS2D Label
+                // CSS2D Label - clean and readable
                 const div = document.createElement('div');
-                div.textContent = repo.name;
+                const displayName = truncateName(repo.name, 22);
+                div.textContent = displayName;
+                div.title = repo.name;
                 div.style.color = '#ffffff';
-                div.style.fontSize = `${Math.floor(13 + scaleVal * 6)}px`;
+                div.style.fontSize = `${Math.floor(13 + scaleVal * 4)}px`;
                 div.style.fontWeight = '600';
-                div.style.fontFamily = "'Inter', system-ui, monospace";
+                div.style.fontFamily = "'Inter', system-ui, sans-serif";
                 div.style.textShadow = `0 0 8px ${repoColor}`;
-                div.style.background = `rgba(10, 15, 25, 0.85)`;
-                div.style.padding = '5px 14px';
-                div.style.borderRadius = '30px';
-                div.style.borderLeft = `3px solid ${repoColor}`;
+                div.style.background = `rgba(10, 15, 28, 0.92)`;
+                div.style.padding = '6px 16px';
+                div.style.borderRadius = '32px';
+                div.style.border = `1px solid ${repoColor}`;
                 div.style.backdropFilter = 'blur(8px)';
-                div.style.transition = 'all 0.15s ease';
+                div.style.transition = 'all 0.2s ease';
                 div.style.cursor = 'pointer';
                 div.style.whiteSpace = 'nowrap';
-                div.style.fontWeight = '500';
+                div.style.letterSpacing = '-0.2px';
                 div.style.pointerEvents = 'auto';
+                div.style.boxShadow = '0 2px 12px rgba(0,0,0,0.4)';
                 
                 div.addEventListener('mouseenter', () => {
-                    div.style.background = `rgba(30, 45, 80, 0.95)`;
-                    div.style.transform = `scale(1.03)`;
+                    div.style.background = `rgba(30, 50, 100, 0.98)`;
+                    div.style.transform = `scale(1.08)`;
+                    div.style.borderWidth = '2px';
                     document.getElementById('info-title').innerHTML = `📁 ${repo.name}`;
-                    document.getElementById('info-desc').innerHTML = `${repo.language} · ⭐ ${repo.stargazers_count} stars<br>📅 Updated: ${repo.pushed_at.slice(0,10)}<br>${repo.description ? repo.description.slice(0, 80) : 'Click to view on GitHub'}`;
+                    document.getElementById('info-desc').innerHTML = `<strong>${repo.language}</strong> · ⭐ ${repo.stargazers_count} stars<br>📅 Last updated: ${repo.pushed_at.slice(0,10)}<br>${repo.description ? repo.description.slice(0, 120) : 'Click to view on GitHub'}`;
                 });
                 
                 div.addEventListener('mouseleave', () => {
-                    div.style.background = `rgba(10, 15, 25, 0.85)`;
+                    div.style.background = `rgba(10, 15, 28, 0.92)`;
                     div.style.transform = `scale(1)`;
+                    div.style.borderWidth = '1px';
                     document.getElementById('info-title').innerHTML = `✨ swipswaps Portfolio`;
-                    document.getElementById('info-desc').innerHTML = `Hover over any glowing repository bubble to see details. Click to open on GitHub.<br><strong>Self-Healing Systems · Observability · Linux Forensics · AI Tooling</strong>`;
+                    document.getElementById('info-desc').innerHTML = `<strong>Self-Healing Systems · Observability · Linux Forensics · AI Tooling</strong><br>Hover over any bubble → details here. Click to open repository on GitHub.`;
                 });
                 
                 div.addEventListener('click', (e) => {
@@ -534,52 +489,44 @@
                 });
                 
                 const label = new CSS2DObject(div);
-                label.position.set(posX, posY + scaleVal * 0.4, posZ);
+                label.position.set(posX, posY + scaleVal * 0.55, posZ);
                 cloudContainer.add(label);
                 
                 wordGroup.push({ sphere, label, repo, posX, posY, posZ, scale: scaleVal, color: repoColor });
             });
             
-            // Timeline connection lines
+            // Add subtle connecting lines
             const points3d = wordGroup.map(w => new THREE.Vector3(w.posX, w.posY, w.posZ));
-            const lineMat = new THREE.LineBasicMaterial({ color: 0x44aaff, transparent: true, opacity: 0.25 });
+            const lineMat = new THREE.LineBasicMaterial({ color: 0x4488aa, transparent: true, opacity: 0.15 });
             for (let i = 0; i < points3d.length - 1; i++) {
                 const geometry = new THREE.BufferGeometry().setFromPoints([points3d[i], points3d[i+1]]);
                 cloudContainer.add(new THREE.Line(geometry, lineMat));
             }
         }
         
-        // --------------------------------------------------------------
-        // ANIMATION
-        // --------------------------------------------------------------
         let time = 0;
         
         function animate() {
             requestAnimationFrame(animate);
-            time += 0.007;
+            time += 0.005;
             
             wordGroup.forEach((item, i) => {
-                const bobY = Math.sin(time * 1.3 + i) * 0.025;
-                const bobX = Math.sin(time * 0.8 + i * 0.6) * 0.015;
+                const bobY = Math.sin(time * 0.8 + i) * 0.015;
                 item.sphere.position.y = item.posY + bobY;
-                item.sphere.position.x = item.posX + bobX;
-                item.label.position.y = item.posY + item.scale * 0.4 + bobY;
-                item.label.position.x = item.posX + bobX;
+                item.label.position.y = item.posY + item.scale * 0.55 + bobY;
             });
             
-            coreGlow.rotation.x += 0.008;
-            coreGlow.rotation.y += 0.01;
+            coreGlow.rotation.x += 0.005;
+            coreGlow.rotation.y += 0.008;
             particles.rotation.z += 0.008;
-            ring1.rotation.z += 0.002;
-            stars.rotation.y -= 0.0003;
-            dust.rotation.y += 0.0004;
+            ring.rotation.z += 0.0015;
+            stars.rotation.y -= 0.0002;
             
             controls.update();
             renderer.render(scene, camera);
             labelRenderer.render(scene, camera);
         }
         
-        // Bootstrap
         await fetchRepos();
         createWordCloud();
         animate();
@@ -591,7 +538,6 @@
             labelRenderer.setSize(window.innerWidth, window.innerHeight);
         });
         
-        // Small delay to ensure loader fades nicely
         setTimeout(() => {
             const loader = document.getElementById('loader');
             if (loader && loader.style.opacity !== '0') {
