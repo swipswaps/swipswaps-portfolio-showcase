@@ -1,0 +1,42 @@
+[
+  {
+    "name": "observability-platform",
+    "pushed_at": "2026-05-15T10:30:00Z",
+    "stargazers_count": 0,
+    "language": "TypeScript",
+    "html_url": "https://github.com/swipswaps/observability-platform",
+    "description": "Full-stack Linux observability with TimescaleDB, Three.js dashboard, self-healing"
+  },
+  {
+    "name": "sys-inspector",
+    "pushed_at": "2026-05-12T14:20:00Z",
+    "stargazers_count": 0,
+    "language": "Python",
+    "html_url": "https://github.com/swipswaps/sys-inspector",
+    "description": "Forensic-grade system transparency and deterministic debugging"
+  },
+  {
+    "name": "parachute-cfd-game",
+    "pushed_at": "2026-05-08T09:15:00Z",
+    "stargazers_count": 0,
+    "language": "GDScript",
+    "html_url": "https://github.com/swipswaps/parachute-cfd-game",
+    "description": "Real terrain CFD to Godot physics simulation pipeline"
+  },
+  {
+    "name": "vscode-llm-multi-provider",
+    "pushed_at": "2026-05-03T16:45:00Z",
+    "stargazers_count": 0,
+    "language": "TypeScript",
+    "html_url": "https://github.com/swipswaps/vscode-llm-multi-provider",
+    "description": "Secure multi-LLM VS Code extension"
+  },
+  {
+    "name": "bcm4331-self-healing",
+    "pushed_at": "2026-04-28T11:00:00Z",
+    "stargazers_count": 0,
+    "language": "Shell",
+    "html_url": "https://github.com/swipswaps/bcm4331-self-healing",
+    "description": "PID-controlled Wi-Fi recovery for Broadcom BCM4331"
+  }
+]
