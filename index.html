@@ -152,7 +152,6 @@
         
         canvas { display: block; }
         
-        /* Hover tooltip style */
         .tag-tooltip {
             position: fixed;
             background: rgba(0,0,0,0.85);
@@ -208,13 +207,6 @@
     </script>
 
     <script type="module">
-        // ============================================================
-        // CITATION: Three.js OrbitControls for smooth dragging
-        // Source: Three.js Examples - Controls
-        // Verbatim quote: "OrbitControls allow the camera to orbit around a target"
-        // URL: https://threejs.org/examples/#misc_controls_orbit
-        // ============================================================
-        
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         
@@ -222,11 +214,11 @@
         let currentFilter = '';
         let scene, camera, renderer, controls;
         let tagObjects = [];
-        let raycaster;
-        let mouse;
         let tooltipDiv;
         
-        // Fallback data (your actual repos from GitHub)
+        // ============================================================
+        // FALLBACK DATA - Your actual repositories
+        // ============================================================
         const FALLBACK_REPOS = [
             { name: "observability-platform", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/observability-platform", date: "2026-05-18" },
             { name: "vscode-llm-multi-provider", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/vscode-llm-multi-provider", date: "2026-05-20" },
@@ -312,11 +304,6 @@
             renderer.setPixelRatio(window.devicePixelRatio);
             document.body.appendChild(renderer.domElement);
             
-            // ============================================================
-            // CITATION: OrbitControls setup for dragging
-            // Source: Three.js OrbitControls documentation
-            // URL: https://threejs.org/docs/#examples/en/controls/OrbitControls
-            // ============================================================
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
@@ -336,7 +323,7 @@
             backLight.position.set(-2, 1, -4);
             scene.add(backLight);
             
-            // Starfield background
+            // Starfield
             const starGeometry = new THREE.BufferGeometry();
             const starCount = 1500;
             const starPositions = new Float32Array(starCount * 3);
@@ -349,33 +336,22 @@
             const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: 0xaaccff, size: 0.1 }));
             scene.add(stars);
             
-            // Create tooltip div
+            // Tooltip
             tooltipDiv = document.createElement('div');
             tooltipDiv.className = 'tag-tooltip';
             tooltipDiv.style.display = 'none';
             document.body.appendChild(tooltipDiv);
             
-            // Raycaster for clicks and hovers
-            raycaster = new THREE.Raycaster();
-            mouse = new THREE.Vector2();
-            
-            // Animation loop
+            // Animation
             function animate() {
                 requestAnimationFrame(animate);
-                controls.update(); // Update controls for damping
+                controls.update();
                 stars.rotation.y += 0.0005;
                 renderer.render(scene, camera);
             }
             animate();
             
-            // Click handler
-            window.addEventListener('click', onClick, false);
-            
-            // Hover handler for tooltips
-            window.addEventListener('mousemove', onMouseMove, false);
-            
-            // Resize handler
-            window.addEventListener('resize', onWindowResize, false);
+            window.addEventListener('resize', onWindowResize);
             function onWindowResize() {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
@@ -383,45 +359,59 @@
             }
         }
         
-        function onMouseMove(event) {
-            if (!tagObjects.length) return;
-            
-            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-            mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
-            
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(tagObjects);
-            
-            if (intersects.length > 0) {
-                const repo = intersects[0].userData.repo;
-                if (repo) {
-                    tooltipDiv.style.display = 'block';
-                    tooltipDiv.innerHTML = `<strong>${repo.name}</strong><br>${repo.language} ★ ${repo.stars}<br>📅 ${repo.date}`;
-                    tooltipDiv.style.left = event.clientX + 'px';
-                    tooltipDiv.style.top = event.clientY + 'px';
-                    document.body.style.cursor = 'pointer';
-                }
-            } else {
-                tooltipDiv.style.display = 'none';
-                document.body.style.cursor = 'default';
-            }
-        }
+        // ============================================================
+        // FIXED: Raycaster for click detection - works with OrbitControls
+        // Source: Three.js Raycaster documentation
+        // URL: https://threejs.org/docs/#api/en/core/Raycaster
+        // ============================================================
         
-        function onClick(event) {
-            if (!tagObjects.length) return;
+        function setupEventListeners() {
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
             
-            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-            mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
-            
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(tagObjects);
-            
-            if (intersects.length > 0) {
-                const repo = intersects[0].userData.repo;
-                if (repo && repo.url) {
-                    window.open(repo.url, '_blank');
+            // Mouse move for tooltips
+            window.addEventListener('mousemove', (event) => {
+                if (!tagObjects.length) return;
+                
+                mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+                mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(tagObjects);
+                
+                if (intersects.length > 0) {
+                    const repo = intersects[0].userData.repo;
+                    if (repo) {
+                        tooltipDiv.style.display = 'block';
+                        tooltipDiv.innerHTML = `<strong>${repo.name}</strong><br>${repo.language} ★ ${repo.stars}<br>📅 ${repo.date}`;
+                        tooltipDiv.style.left = event.clientX + 15 + 'px';
+                        tooltipDiv.style.top = event.clientY - 40 + 'px';
+                        document.body.style.cursor = 'pointer';
+                    }
+                } else {
+                    tooltipDiv.style.display = 'none';
+                    document.body.style.cursor = 'default';
                 }
-            }
+            });
+            
+            // Click handler - FIXED: uses same raycasting logic
+            window.addEventListener('click', (event) => {
+                if (!tagObjects.length) return;
+                
+                mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+                mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(tagObjects);
+                
+                if (intersects.length > 0) {
+                    const repo = intersects[0].userData.repo;
+                    if (repo && repo.url) {
+                        console.log('Opening:', repo.url);
+                        window.open(repo.url, '_blank');
+                    }
+                }
+            });
         }
         
         function createTagCloud() {
@@ -444,16 +434,11 @@
                 return;
             }
             
-            // ============================================================
-            // CITATION: Fibonacci sphere algorithm for even distribution
-            // Source: "Evenly distributing points on a sphere" research
-            // URL: https://observablehq.com/@mourner/mapping-points-on-a-sphere
-            // ============================================================
             const radius = 5.5;
             const goldenRatio = (1 + Math.sqrt(5)) / 2;
             
             filteredRepos.forEach((repo, idx) => {
-                // Fibonacci sphere algorithm for even point distribution
+                // Fibonacci sphere distribution
                 const theta = 2 * Math.PI * idx / goldenRatio;
                 const phi = Math.acos(1 - 2 * (idx + 0.5) / filteredRepos.length);
                 
@@ -461,23 +446,20 @@
                 const y = Math.sin(phi) * Math.sin(theta) * radius * 0.8;
                 const z = Math.cos(phi) * radius;
                 
-                // Create canvas texture
+                // Canvas texture
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 canvas.width = 512;
                 canvas.height = 128;
                 
-                // Background
                 ctx.fillStyle = '#1a1a2e';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                // Border with language color
                 const langColor = getLanguageColor(repo.language);
                 ctx.strokeStyle = langColor;
                 ctx.lineWidth = 3;
                 ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
                 
-                // Repository name
                 let displayName = repo.name;
                 if (displayName.length > 25) {
                     displayName = displayName.slice(0, 22) + '...';
@@ -489,7 +471,6 @@
                 ctx.textBaseline = 'middle';
                 ctx.fillText(displayName, canvas.width / 2, canvas.height / 2 - 10);
                 
-                // Language and stars
                 ctx.font = '14px monospace';
                 ctx.fillStyle = langColor;
                 ctx.fillText(`${repo.language}  ★ ${repo.stars}`, canvas.width / 2, canvas.height / 2 + 25);
@@ -504,6 +485,9 @@
                 scene.add(sprite);
                 tagObjects.push(sprite);
             });
+            
+            // Re-setup event listeners after cloud creation
+            setupEventListeners();
         }
         
         // Search functionality
@@ -523,7 +507,7 @@
             createTagCloud();
         });
         
-        // Initialize everything
+        // Initialize
         initThreeJS();
         fetchRepos();
     </script>
