@@ -2,470 +2,253 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>swipswaps · 3D Portfolio & Repo Search</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>swipswaps · 3D Portfolio – Verbose Logs + Readable UI</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: linear-gradient(135deg, #0a0f1a 0%, #050b1a 100%);
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-            overflow-x: hidden;
-        }
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(8,12,20,0.9);
-            backdrop-filter: blur(16px);
-            padding: 12px 24px;
-            z-index: 100;
-            border-bottom: 1px solid rgba(94,255,224,0.2);
-        }
-        .header h1 { font-size: 1.1rem; font-weight: 600; color: white; }
-        .header p { font-size: 0.7rem; color: #88aacc; margin-top: 2px; }
-        .social-links {
-            position: fixed;
-            top: 12px;
-            right: 24px;
-            display: flex;
-            gap: 12px;
-            z-index: 100;
-        }
-        .social-links a {
-            color: #ccc;
-            text-decoration: none;
-            font-size: 13px;
-            background: rgba(8,12,20,0.8);
-            padding: 8px 16px;
-            border-radius: 40px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .social-links a:hover { color: #5effe0; }
-        .container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            padding-top: 100px;
-            padding-bottom: 100px;
-        }
-        .main-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2rem;
-            padding: 2rem;
-        }
-        .cloud-panel {
-            flex: 2;
-            min-width: 300px;
-            background: rgba(8,12,20,0.4);
-            border-radius: 24px;
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(94,255,224,0.2);
-            overflow: hidden;
-            position: relative;
-            height: 70vh;
-        }
-        .search-panel {
-            flex: 1;
-            min-width: 320px;
-            background: rgba(8,12,20,0.7);
-            backdrop-filter: blur(12px);
-            border-radius: 24px;
-            border: 1px solid rgba(94,255,224,0.3);
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            max-height: 70vh;
-            overflow-y: auto;
-        }
-        .search-panel, .search-panel * { color: #e8edf5 !important; }
-        .result-item {
-            background: #0f0f1a !important;
-            border-left: 2px solid #5effe0 !important;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            cursor: pointer;
-        }
-        .result-item:hover { background: #1a1a2e !important; }
-        .search-box {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .search-box input {
-            flex: 1;
-            background: #1a1a2e;
-            border: 1px solid #2a2a3e;
-            border-radius: 40px;
-            padding: 10px 16px;
-            color: white;
-            font-family: monospace;
-        }
-        .search-box button {
-            background: #5effe0;
-            color: #0a0f1a;
-            border: none;
-            padding: 0 20px;
-            border-radius: 40px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .status-badge {
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            display: inline-block;
-        }
-        .status-online { background: #2e7d64; color: #5effe0 !important; }
-        .status-offline { background: #5a2a2a; color: #ffaa88 !important; }
-        .instructions {
-            background: #0f0f1a;
-            border-radius: 16px;
-            padding: 1rem;
-            font-family: monospace;
-            font-size: 12px;
-            margin-top: 1rem;
-            border-left: 3px solid #5effe0;
-        }
-        .search-results { display: flex; flex-direction: column; gap: 12px; margin-top: 1rem; max-height: 300px; overflow-y: auto; }
-        #canvas-container { width: 100%; height: 100%; }
-        .controls-hint {
-            position: fixed;
-            bottom: 16px;
-            right: 20px;
-            background: rgba(0,0,0,0.5);
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 10px;
-            color: #aaa;
-            z-index: 100;
-        }
-        @media (max-width: 800px) {
-            .main-grid { flex-direction: column; padding: 1rem; }
-            .cloud-panel { height: 50vh; }
-            .search-panel { max-height: 50vh; }
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:radial-gradient(circle at 20% 30%,#0a0f1a,#03050a);font-family:system-ui,sans-serif;overflow:hidden}
+        .header{position:fixed;top:0;left:0;right:0;background:rgba(8,12,20,0.96);backdrop-filter:blur(20px);padding:12px 24px;z-index:200;border-bottom:1px solid rgba(94,255,224,0.35)}
+        .header h1{font-size:1.2rem;color:white}
+        .header p{font-size:0.7rem;color:#88aacc}
+        .social-links{position:fixed;top:12px;right:20px;display:flex;gap:10px;z-index:200}
+        .social-links a{color:#e8edf5;text-decoration:none;font-size:12px;background:rgba(8,12,20,0.85);padding:6px 14px;border-radius:40px;border:1px solid rgba(94,255,224,0.3)}
+        .social-links a:hover{color:#5effe0;border-color:#5effe0}
+        .main-layout{display:flex;flex-direction:row!important;height:100vh;padding-top:80px;overflow:hidden}
+        .canvas-panel{flex:2.5;margin:12px 6px 12px 16px;background:rgba(0,0,0,0.2);border-radius:24px;overflow:hidden;position:relative}
+        #canvas-container{width:100%;height:100%}
+        .info-panel{flex:1.2;min-width:320px;background:rgba(8,12,22,0.94);backdrop-filter:blur(24px);margin:12px 16px 12px 6px;border-radius:24px;border:1px solid rgba(94,255,224,0.3);display:flex;flex-direction:column;overflow:hidden}
+        .panel-header{padding:16px 18px;border-bottom:1px solid rgba(94,255,224,0.15)}
+        .panel-header h2{color:#5effe0;font-size:1.1rem}
+        .panel-scroll{flex:1;overflow-y:auto;padding:14px 16px}
+        .status-badge{font-size:11px;padding:4px 10px;border-radius:20px;display:inline-block;margin-bottom:14px}
+        .online{background:rgba(30,70,50,0.9);color:#5effe0;border:1px solid #5effe0}
+        .offline{background:rgba(70,40,40,0.9);color:#ffaa88;border:1px solid #ffaa88}
+        .search-area{background:#0a0a14;border:1px solid #2a2a3e;border-radius:60px;padding:8px 16px;margin-bottom:18px;display:flex;gap:8px}
+        .search-area input{flex:1;background:transparent;border:none;color:white;font-family:monospace;outline:none}
+        .search-area button{background:#2e7d64;color:#e8edf5;border:none;border-radius:40px;padding:5px 16px;cursor:pointer}
+        .search-area button:hover{background:#5effe0;color:#0a0f1a}
+        .collapsible{margin-bottom:18px;border:1px solid rgba(94,255,224,0.2);border-radius:16px;overflow:hidden}
+        .collapsible-header{background:rgba(15,15,26,0.8);padding:10px 14px;cursor:pointer;color:#5effe0;display:flex;justify-content:space-between}
+        .collapsible-content{padding:12px 14px;background:rgba(8,12,22,0.7);display:none}
+        .collapsible-content.active{display:block}
+        .repo-current{background:rgba(10,10,20,0.9);border-radius:14px;padding:10px 12px;border-left:3px solid #5effe0}
+        .repo-current-name{font-size:14px;font-weight:700;color:#5effe0}
+        .repo-current-details{font-size:11px;color:#88aacc}
+        .section-title{font-size:11px;font-weight:700;color:#5effe0;margin:10px 0 6px;text-transform:uppercase}
+        .related-item{background:rgba(20,20,35,0.95);border-radius:12px;padding:8px 12px;margin-bottom:8px;cursor:pointer;border:1px solid #2a2a3e}
+        .related-item:hover{background:#2a2a3e;transform:translateX(4px);border-color:#5effe0}
+        .related-name{font-weight:700;font-size:12px;color:#e8edf5}
+        .related-lang{font-size:10px;color:#88aacc}
+        .related-desc{font-size:10px;color:#aaccff}
+        .code-snippet{background:#0a0a0f;border-radius:10px;padding:8px 10px;font-family:monospace;font-size:10px;color:#b8ffb8;border:1px solid #2a2a3e}
+        .empty-message{color:#aaa;text-align:center;padding:20px}
+        .hint{position:fixed;bottom:14px;right:18px;background:rgba(0,0,0,0.7);padding:5px 14px;border-radius:40px;font-size:10px;color:#888;z-index:200}
+        .debug-panel{position:fixed;bottom:14px;left:18px;background:rgba(0,0,0,0.9);backdrop-filter:blur(8px);padding:8px 12px;border-radius:12px;font-family:monospace;font-size:10px;color:#0f0;z-index:300;max-width:380px;pointer-events:auto;border:1px solid #ff66cc;max-height:250px;overflow-y:auto}
+        .debug-panel button{background:#2e7d64;border:none;color:white;padding:2px 8px;border-radius:8px;cursor:pointer;margin:2px;font-size:9px}
     </style>
 </head>
 <body>
-<div class="header">
-    <h1>José Melendez</h1>
-    <p>DevOps Data Scientist · AI-Augmented Reliability Engineer</p>
-</div>
-<div class="social-links">
-    <a href="https://github.com/swipswaps" target="_blank">GitHub</a>
-    <a href="https://x.com/swipswaps" target="_blank">X/Twitter</a>
-</div>
-<div class="controls-hint">🖱️ Drag to rotate • Click any repo to open</div>
-
-<div class="container">
-    <div class="main-grid">
-        <div class="cloud-panel"><div id="canvas-container" style="width:100%; height:100%;"></div></div>
-        <div class="search-panel">
-            <!-- ===== REPO SEARCH (ALWAYS WORKS, NO BACKEND) ===== -->
-            <div>
-                <h2>🔍 Repo Search</h2>
-                <div class="search-box">
-                    <input type="text" id="repo-query" placeholder="e.g., fedora, observability, python">
-                    <button id="repo-search-btn">Search</button>
-                </div>
-                <div id="repo-results" class="search-results"></div>
-            </div>
-
-            <!-- ===== ADVANCED CODE SEARCH (OPTIONAL, NEEDS LOCAL BACKEND) ===== -->
-            <div style="border-top: 1px solid #2a2a3e; padding-top: 1rem;">
-                <h2>🔬 Code Search (advanced)</h2>
-                <div id="backend-status">⏳ Checking local backend...</div>
-                <div class="search-box">
-                    <input type="text" id="code-query" placeholder="Search inside code (requires local backend)" disabled>
-                    <button id="code-search-btn" disabled>Search Code</button>
-                </div>
-                <div id="code-results" class="search-results"></div>
-                <div id="instructions-panel"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
-        }
-    }
-</script>
-
+<div class="header"><h1>José Melendez</h1><p>DevOps Data Scientist · AI-Augmented Reliability Engineer</p></div>
+<div class="social-links"><a href="https://github.com/swipswaps" target="_blank">GitHub</a><a href="https://x.com/swipswaps" target="_blank">X/Twitter</a></div>
+<div class="hint">🖱️ Drag to rotate • Hover any tag → see related info</div>
+<div class="main-layout"><div class="canvas-panel"><div id="canvas-container"></div></div>
+<div class="info-panel"><div class="panel-header"><h2>🔍 Code Explorer</h2><p>Hover repos to see related code • Search any term</p></div>
+<div class="panel-scroll"><div id="status-area"></div><div class="search-area"><input type="text" id="searchInput" placeholder="🔎 Search..."><button id="searchBtn">Search</button></div>
+<div id="hoverSection" class="collapsible"><div class="collapsible-header" onclick="toggleCollapsible(this)"><span>📍 Currently Hovering</span><span class="indicator">▼</span></div><div class="collapsible-content active" id="hoverContent"><div class="empty-message">✨ Hover over any repository</div></div></div>
+<div id="searchSection" class="collapsible"><div class="collapsible-header" onclick="toggleCollapsible(this)"><span>🔎 Search Results</span><span class="indicator">▼</span></div><div class="collapsible-content active" id="searchResults"><div class="empty-message">Enter a search term above</div></div></div></div></div></div>
+<div class="debug-panel" id="debugPanel"><div><strong>📡 VERBOSE LOGS</strong> <button id="downloadLogs">📥 Save</button> <button id="clearLogs">🗑️ Clear</button></div><div id="debugText">Initializing...</div></div>
+<script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.128.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/" } }</script>
 <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-    // ==================== MASTER REPO LIST (includes Fedora) ====================
-    const MASTER_REPOS = [
-        { name: "observability-platform", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/observability-platform", date: "2026-05-18" },
-        { name: "vscode-llm-multi-provider", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/vscode-llm-multi-provider", date: "2026-05-20" },
-        { name: "sys-inspector", language: "Python", stars: 0, url: "https://github.com/swipswaps/sys-inspector", date: "2026-04-12" },
-        { name: "parachute-cfd-game", language: "GDScript", stars: 0, url: "https://github.com/swipswaps/parachute-cfd-game", date: "2026-04-28" },
-        { name: "bcm4331-self-healing", language: "Shell", stars: 0, url: "https://github.com/swipswaps/bcm4331-self-healing", date: "2026-04-22" },
-        { name: "callback-platform", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/callback-platform", date: "2026-05-15" },
-        { name: "firefox_fix", language: "Shell", stars: 0, url: "https://github.com/swipswaps/firefox_fix", date: "2026-05-14" },
-        { name: "conversation-search", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/conversation-search", date: "2026-05-10" },
-        { name: "bcm4331-fedora-offline-fix-UPGRADE", language: "Shell", stars: 0, url: "https://github.com/swipswaps/bcm4331-fedora-offline-fix-UPGRADE", date: "2026-05-01" },
-        { name: "fedora-network-controller", language: "Python", stars: 0, url: "https://github.com/swipswaps/fedora-network-controller", date: "2026-04-25" },
-        { name: "fedora-optimizer", language: "Shell", stars: 0, url: "https://github.com/swipswaps/fedora-optimizer", date: "2026-04-20" },
-        { name: "Master-FB", language: "Python", stars: 0, url: "https://github.com/swipswaps/Master-FB", date: "2026-05-08" },
-        { name: "balloon-color-plan", language: "JavaScript", stars: 0, url: "https://github.com/swipswaps/balloon-color-plan", date: "2026-05-07" },
-        { name: "lossless-ffmpeg-concat", language: "Shell", stars: 0, url: "https://github.com/swipswaps/lossless-ffmpeg-concat", date: "2026-05-05" },
-        { name: "Masterclass-TUI", language: "Python", stars: 0, url: "https://github.com/swipswaps/Masterclass-TUI", date: "2026-05-03" },
-        { name: "controller-Unified", language: "C", stars: 0, url: "https://github.com/swipswaps/controller-Unified", date: "2026-05-01" }
-    ];
+let debugLog=[],fullLog=[];
+function logVerbose(msg){let t=new Date().toLocaleTimeString(),e=`[${t}] ${msg}`;debugLog.push(e);fullLog.push(e);console.log(e);let d=document.getElementById('debugText');if(d)d.innerText=debugLog.slice(-8).join('\n');}
+window.addEventListener('error',e=>logVerbose(`🔥 ERROR: ${e.message}`));
+window.addEventListener('unhandledrejection',e=>logVerbose(`💔 REJECTION: ${e.reason}`));
 
-    let allRepos = [...MASTER_REPOS];
-    let tagSprites = [];
-    let scene, camera, renderer, controls;
-    let tooltipDiv;
-
-    // ----- Client-side fuzzy search -----
-    function fuzzySearchRepos(query) {
-        if (!query || query.length < 2) return [];
-        const lower = query.toLowerCase();
-        return allRepos
-            .map(repo => {
-                if (repo.name.toLowerCase().includes(lower)) return { ...repo, score: 1 };
-                if (repo.language.toLowerCase().includes(lower)) return { ...repo, score: 0.6 };
-                return null;
-            })
-            .filter(r => r)
-            .sort((a,b) => b.score - a.score)
-            .slice(0, 20);
-    }
-
-    function displayRepoResults(results) {
-        const container = document.getElementById('repo-results');
-        if (!results.length) {
-            container.innerHTML = '<div style="color:#aaa;">📭 No matching repositories.</div>';
+let allRepos=[],tagLabels=[],scene,camera,renderer,labelRenderer,controls;
+async function fetchRepos(){
+    logVerbose('📡 Fetching repos from GitHub...');
+    try{
+        let r=await fetch('https://api.github.com/users/swipswaps/repos?sort=pushed&direction=desc&per_page=50');
+        if(r.ok){
+            let d=await r.json();
+            allRepos=d.map(r=>({name:r.name,language:r.language||'Unknown',stars:r.stargazers_count||0,url:r.html_url,date:r.pushed_at?r.pushed_at.slice(0,10):'2026-01-01',description:r.description||''}));
+            logVerbose(`✅ Loaded ${allRepos.length} repos from GitHub`);
             return;
         }
-        container.innerHTML = results.map(r => `
-            <div class="result-item" onclick="window.open('${r.url}', '_blank')">
-                <div><strong>📁 ${r.name}</strong> <span style="color:#5effe0;">${r.language}</span></div>
-                <div style="font-size:11px;">⭐ ${r.stars} stars · 📅 ${r.date}</div>
-            </div>
-        `).join('');
+        throw new Error();
+    }catch(e){
+        logVerbose(`⚠️ GitHub API failed, using ${allRepos.length} fallback repos`);
+        allRepos=[
+            {name:"GEMMA_4_FORGE_FEDORA_43-",language:"TypeScript",stars:0,url:"#",date:"2026-04-19",description:"Gemma 4 AI forge"},
+            {name:"observability-platform",language:"TypeScript",stars:0,url:"#",date:"2026-05-18",description:"Full-stack observability"},
+            {name:"storyboard-studio",language:"HTML",stars:0,url:"#",date:"2026-05-14",description:"Storyboard studio"},
+            {name:"sys-inspector",language:"Python",stars:0,url:"#",date:"2026-04-12",description:"System forensics"},
+            {name:"bcm4331-forensic-controller",language:"Shell",stars:0,url:"#",date:"2026-04-10",description:"Self-healing WiFi"}
+        ];
     }
-
-    // ----- 3D Cloud (with proper disposal and no `data-badge`) -----
-    function getLanguageColor(lang) {
-        const c = { JavaScript:'#f7df1e', TypeScript:'#3178c6', Python:'#3572A5', Shell:'#89e051', GDScript:'#478cbf', Unknown:'#888', C:'#555555' };
-        return c[lang] || '#44aaff';
+}
+function showRepoInfo(repo){
+    let c=document.getElementById('hoverContent');
+    if(!repo){
+        c.innerHTML='<div class="empty-message">✨ Hover over any repository</div>';
+        logVerbose(`🖱️ Hover ended – cleared panel`);
+        return;
     }
-
-    function initThreeJS() {
-        const container = document.getElementById('canvas-container');
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050b1a);
-        scene.fog = new THREE.FogExp2(0x050b1a, 0.005);
-        camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
-        camera.position.set(0, 0.5, 9);
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        container.appendChild(renderer.domElement);
-        controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.target.set(0,0,0);
-        
-        const ambient = new THREE.AmbientLight(0x404060);
-        scene.add(ambient);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-        dirLight.position.set(2,5,3);
-        scene.add(dirLight);
-        
-        const starGeo = new THREE.BufferGeometry();
-        const starPos = new Float32Array(1500*3);
-        for(let i=0;i<1500;i++) { starPos[i*3]=(Math.random()-0.5)*200; starPos[i*3+1]=(Math.random()-0.5)*100; starPos[i*3+2]=(Math.random()-0.5)*80-40; }
-        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos,3));
-        const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color:0xaaccff, size:0.08 }));
-        scene.add(stars);
-        
-        tooltipDiv = document.createElement('div');
-        tooltipDiv.style.cssText = 'position:fixed;background:#0a0f1aee;backdrop-filter:blur(12px);color:#e8edf5;padding:8px 16px;border-radius:16px;border-left:3px solid #5effe0;font-size:12px;pointer-events:none;z-index:200;display:none;';
-        document.body.appendChild(tooltipDiv);
-        
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            stars.rotation.y += 0.0005;
-            renderer.render(scene, camera);
-        }
-        animate();
-        window.addEventListener('resize', () => {
-            const w = container.clientWidth, h = container.clientHeight;
-            camera.aspect = w/h;
-            camera.updateProjectionMatrix();
-            renderer.setSize(w,h);
-        });
+    logVerbose(`🖱️ Hover on: ${repo.name}`);
+    let html=`<div class="repo-current"><div class="repo-current-name">📁 ${repo.name}</div><div class="repo-current-details">${repo.language} · ⭐ ${repo.stars} stars · ${repo.date}</div>${repo.description?`<div class="repo-current-details">${repo.description}</div>`:''}</div>`;
+    let related=allRepos.filter(r=>r.name!==repo.name).slice(0,6);
+    if(related.length){
+        html+=`<div class="section-title">🔗 Related repositories</div>`;
+        for(let rel of related) html+=`<div class="related-item" onclick="window.open('${rel.url}','_blank')"><div class="related-name">${rel.name}</div><div class="related-lang">${rel.language} · ⭐ ${rel.stars}</div>${rel.description?`<div class="related-desc">${rel.description.slice(0,80)}</div>`:''}</div>`;
+    }else html+=`<div class="empty-message">No related repos.</div>`;
+    html+=`<div class="section-title">📝 Code example</div><div class="code-snippet">def analyze():\n    return "AI-assisted reliability"</div>`;
+    c.innerHTML=html;
+}
+async function performSearch(){
+    let q=document.getElementById('searchInput').value.trim().toLowerCase();
+    let r=document.getElementById('searchResults');
+    if(q.length<2){
+        r.innerHTML='<div class="empty-message">Enter at least 2 characters</div>';
+        logVerbose(`🔎 Search: empty query`);
+        return;
     }
-
-    function createTagCloud() {
-        // Dispose old resources to prevent memory leak
-        tagSprites.forEach(sprite => {
-            if (sprite.material?.map) sprite.material.map.dispose();
-            if (sprite.material) sprite.material.dispose();
-            scene.remove(sprite);
-        });
-        tagSprites = [];
-        if(!allRepos.length) return;
-        const radius = 4.0;
-        const golden = (1+Math.sqrt(5))/2;
-        allRepos.forEach((repo, idx) => {
-            const theta = 2*Math.PI*idx/golden;
-            const phi = Math.acos(1 - 2*(idx+0.5)/allRepos.length);
-            const x = Math.sin(phi)*Math.cos(theta)*radius;
-            const y = Math.sin(phi)*Math.sin(theta)*radius*0.7;
-            const z = Math.cos(phi)*radius;
-            const canvas = document.createElement('canvas');
-            canvas.width = 640;
-            canvas.height = 110;
-            const ctx = canvas.getContext('2d');
-            const grad = ctx.createLinearGradient(0,0,0,canvas.height);
-            grad.addColorStop(0,'#1e2438'); grad.addColorStop(1,'#161c2c');
-            ctx.fillStyle = grad; ctx.fillRect(0,0,canvas.width,canvas.height);
-            const langColor = getLanguageColor(repo.language);
-            ctx.strokeStyle = langColor; ctx.lineWidth=3; ctx.strokeRect(5,5,canvas.width-10,canvas.height-10);
-            let name = repo.name.length>28 ? repo.name.slice(0,25)+'...' : repo.name;
-            ctx.font = `600 ${Math.min(32,22+Math.floor(repo.stars/4))}px system-ui, sans-serif`;
-            ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.fillText(name, canvas.width/2, canvas.height/2-10);
-            ctx.font = '13px monospace'; ctx.fillStyle=langColor;
-            ctx.fillText(`${repo.language}  ★ ${repo.stars}`, canvas.width/2, canvas.height/2+22);
-            const tex = new THREE.CanvasTexture(canvas);
-            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex }));
-            sprite.scale.set(2.6,0.6,1); sprite.position.set(x,y,z);
-            sprite.userData = { repo };
-            scene.add(sprite);
-            tagSprites.push(sprite);
-        });
-        attachInteractionsOnce();
+    logVerbose(`🔎 Searching for: "${q}"`);
+    r.innerHTML=`<div class="section-title">🔍 Results for "${q}"</div>`;
+    let matches=allRepos.filter(r=>r.name.toLowerCase().includes(q)||(r.language&&r.language.toLowerCase().includes(q))||(r.description&&r.description.toLowerCase().includes(q)));
+    if(matches.length){
+        logVerbose(`📋 Found ${matches.length} matches`);
+        for(let m of matches.slice(0,12)) r.innerHTML+=`<div class="related-item" onclick="window.open('${m.url}','_blank')"><div class="related-name">📁 ${m.name}</div><div class="related-lang">${m.language} · ⭐ ${m.stars}</div>${m.description?`<div class="related-desc">${m.description.slice(0,80)}</div>`:''}</div>`;
+    }else{
+        r.innerHTML+=`<div class="empty-message">No matches.</div>`;
+        logVerbose(`❌ No matches found`);
     }
-
-    let interactionsAttached = false;
-    function attachInteractionsOnce() {
-        if (interactionsAttached) return;
-        interactionsAttached = true;
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        const canvas = renderer.domElement;
-        function getRepoFromEvent(clientX, clientY) {
-            mouse.x = (clientX / canvas.clientWidth) * 2 - 1;
-            mouse.y = -(clientY / canvas.clientHeight) * 2 + 1;
-            raycaster.setFromCamera(mouse, camera);
-            const hits = raycaster.intersectObjects(tagSprites);
-            if (hits.length && hits[0].object.userData?.repo) return hits[0].object.userData.repo;
-            return null;
-        }
-        const onMouseMove = (e) => {
-            if (!tagSprites.length) return;
-            const repo = getRepoFromEvent(e.clientX, e.clientY);
-            if (repo) {
-                tooltipDiv.style.display = 'block';
-                tooltipDiv.innerHTML = `<strong>${repo.name}</strong><br>📝 ${repo.language}<br>⭐ ${repo.stars}<br>📅 ${repo.date}<br>⚡ Click to open`;
-                tooltipDiv.style.left = (e.clientX + 15) + 'px';
-                tooltipDiv.style.top = (e.clientY + 20) + 'px';
-                canvas.style.cursor = 'pointer';
-            } else {
-                tooltipDiv.style.display = 'none';
-                canvas.style.cursor = 'default';
-            }
-        };
-        let downPos = null, downTime = 0;
-        const onPointerDown = (e) => { downPos = { x: e.clientX, y: e.clientY }; downTime = Date.now(); };
-        const onPointerUp = (e) => {
-            if (!downPos) return;
-            const dx = Math.abs(e.clientX - downPos.x), dy = Math.abs(e.clientY - downPos.y);
-            const duration = Date.now() - downTime;
-            if (dx < 10 && dy < 10 && duration < 500) {
-                const repo = getRepoFromEvent(e.clientX, e.clientY);
-                if (repo && repo.url) window.open(repo.url, '_blank');
-            }
-            downPos = null;
-        };
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('pointerdown', onPointerDown);
-        window.addEventListener('pointerup', onPointerUp);
-    }
-
-    // ----- Backend detection (optional, static port 3001) -----
-    const BACKEND_URL = 'http://localhost:3001';
-    let backendOnline = false;
-    async function checkBackend() {
-        const statusDiv = document.getElementById('backend-status');
-        try {
-            const res = await fetch(`${BACKEND_URL}/api/health`, { method: 'HEAD', mode: 'cors' });
-            if (res.ok) {
-                backendOnline = true;
-                statusDiv.innerHTML = '<span class="status-badge status-online">✅ Code search backend available</span>';
-                document.getElementById('code-query').disabled = false;
-                document.getElementById('code-search-btn').disabled = false;
-                document.getElementById('instructions-panel').innerHTML = '';
-                return;
-            }
-        } catch(e) {}
-        backendOnline = false;
-        statusDiv.innerHTML = '<span class="status-badge status-offline">❌ Code search requires local backend (optional)</span>';
-        document.getElementById('code-query').disabled = true;
-        document.getElementById('code-search-btn').disabled = true;
-        document.getElementById('instructions-panel').innerHTML = `
-            <div class="instructions">
-                <strong>🔬 Advanced Code Search</strong><br>
-                <span style="font-size:11px;">To search inside code files, run the local backend:</span>
-                <code>git clone https://github.com/swipswaps/swipswaps-portfolio-showcase.git<br>cd swipswaps-portfolio-showcase<br>npm install<br>npm start</code>
-                <span style="font-size:11px;">The repo name search above always works.</span>
-            </div>
-        `;
-    }
-
-    async function performCodeSearch() {
-        if(!backendOnline) return;
-        const query = document.getElementById('code-query').value.trim();
-        if(query.length < 2) return;
-        const resultsDiv = document.getElementById('code-results');
-        resultsDiv.innerHTML = '<div>🔍 Searching code...</div>';
-        try {
-            const res = await fetch(`${BACKEND_URL}/api/search-code?q=${encodeURIComponent(query)}`);
-            const data = await res.json();
-            if(data.results && data.results.length) {
-                resultsDiv.innerHTML = data.results.map(r => `
-                    <div class="result-item">
-                        <div><strong>📁 ${r.repo_name}</strong> – ${r.file_path}</div>
-                        <div class="code-snippet" style="background:#000; padding:5px; border-radius:5px; margin-top:5px; font-size:10px;">${escapeHtml(r.content.substring(0,200))}...</div>
-                    </div>
-                `).join('');
-            } else {
-                resultsDiv.innerHTML = '<div>📭 No matching code.</div>';
-            }
-        } catch(err) {
-            resultsDiv.innerHTML = '<div>⚠️ Backend error.</div>';
-        }
-    }
-
-    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
-
-    // ----- Bootstrap -----
-    initThreeJS();
-    createTagCloud();
-    // Repo search (client side, always works)
-    document.getElementById('repo-search-btn').addEventListener('click', () => {
-        const q = document.getElementById('repo-query').value;
-        displayRepoResults(fuzzySearchRepos(q));
+}
+function initThreeJS(){
+    let container=document.getElementById('canvas-container');
+    let w=container.clientWidth,h=container.clientHeight;
+    scene=new THREE.Scene();scene.background=new THREE.Color(0x050b1a);scene.fog=new THREE.FogExp2(0x050b1a,0.005);
+    camera=new THREE.PerspectiveCamera(45,w/h,0.1,1000);camera.position.set(0,1.5,13);
+    renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(w,h);container.appendChild(renderer.domElement);
+    labelRenderer=new CSS2DRenderer();labelRenderer.setSize(w,h);
+    labelRenderer.domElement.style.position='absolute';labelRenderer.domElement.style.top='0px';labelRenderer.domElement.style.left='0px';
+    labelRenderer.domElement.style.pointerEvents='none'; // let canvas receive mouse events
+    container.appendChild(labelRenderer.domElement);
+    controls=new OrbitControls(camera,renderer.domElement);
+    controls.enableDamping=true;controls.autoRotate=true;controls.autoRotateSpeed=0.6;controls.enableZoom=true;controls.target.set(0,0,0);
+    let ambient=new THREE.AmbientLight(0x404060);scene.add(ambient);
+    let mainLight=new THREE.DirectionalLight(0xffffff,1.2);mainLight.position.set(5,10,7);scene.add(mainLight);
+    let starGeo=new THREE.BufferGeometry(),starCount=1500,starPos=new Float32Array(starCount*3);
+    for(let i=0;i<starCount;i++){starPos[i*3]=(Math.random()-0.5)*200;starPos[i*3+1]=(Math.random()-0.5)*100;starPos[i*3+2]=(Math.random()-0.5)*80-40;}
+    starGeo.setAttribute('position',new THREE.BufferAttribute(starPos,3));let stars=new THREE.Points(starGeo,new THREE.PointsMaterial({color:0x88aaff,size:0.12}));scene.add(stars);
+    function animate(){requestAnimationFrame(animate);controls.update();stars.rotation.y+=0.0003;renderer.render(scene,camera);labelRenderer.render(scene,camera);}
+    animate();
+    window.addEventListener('resize',()=>{let w=container.clientWidth,h=container.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);labelRenderer.setSize(w,h);});
+    logVerbose('✅ Three.js initialized');
+}
+function getLanguageColor(lang){let c={JavaScript:'#f7df1e',TypeScript:'#3178c6',Python:'#3572A5',Shell:'#89e051',HTML:'#e34c26',CSS:'#563d7c'};return c[lang]||'#44aaff';}
+function createTagCloud(){
+    tagLabels.forEach(l=>scene.remove(l));tagLabels=[];
+    if(!allRepos.length){logVerbose('❌ No repos!');return;}
+    let radius=5.5,golden=(1+Math.sqrt(5))/2;
+    allRepos.forEach((repo,idx)=>{
+        let theta=2*Math.PI*idx/golden,phi=Math.acos(1-2*(idx+0.5)/allRepos.length);
+        let x=Math.sin(phi)*Math.cos(theta)*radius,y=Math.sin(phi)*Math.sin(theta)*radius*0.6,z=Math.cos(phi)*radius;
+        let div=document.createElement('div');
+        div.style.backgroundColor='rgba(18,18,31,0.95)';
+        div.style.border=`2px solid ${getLanguageColor(repo.language)}`;
+        div.style.borderRadius='16px';
+        div.style.padding='8px 14px';
+        div.style.textAlign='center';
+        div.style.fontFamily='system-ui,sans-serif';
+        div.style.color='#ffffff';
+        div.style.fontSize='14px';
+        div.style.fontWeight='600';
+        div.style.transition='all 0.15s';
+        div.style.backdropFilter='blur(4px)';
+        div.style.whiteSpace='nowrap';
+        div.style.maxWidth='240px';
+        div.style.overflow='hidden';
+        div.style.textOverflow='ellipsis';
+        div.style.pointerEvents='none'; // raycasting handles interactions
+        let dn=repo.name.length>24?repo.name.slice(0,21)+'...':repo.name;
+        div.innerHTML=`<strong>${dn}</strong><br><span style="font-size:11px; color:${getLanguageColor(repo.language)};">${repo.language} ★ ${repo.stars}</span><br><span style="font-size:9px; color:#88aacc;">${repo.date}</span>`;
+        let label=new CSS2DObject(div);
+        label.position.set(x,y,z);
+        label.userData={repo};
+        scene.add(label);
+        tagLabels.push(label);
+        logVerbose(`🏷️ Label added: ${repo.name} at (${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)})`);
     });
-    document.getElementById('repo-query').addEventListener('keypress', (e) => { if(e.key === 'Enter') document.getElementById('repo-search-btn').click(); });
-    // Code search (optional backend)
-    document.getElementById('code-search-btn').addEventListener('click', performCodeSearch);
-    document.getElementById('code-query').addEventListener('keypress', (e) => { if(e.key === 'Enter') performCodeSearch(); });
-    checkBackend();
+    logVerbose(`🎨 Total CSS2D labels: ${tagLabels.length}`);
+
+    // Raycaster for hover/click with verbose logging
+    let raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2(),currentHovered=null;
+    window.addEventListener('mousemove',(e)=>{
+        let rect=renderer.domElement.getBoundingClientRect();
+        mouse.x=((e.clientX-rect.left)/rect.width)*2-1;
+        mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
+        raycaster.setFromCamera(mouse,camera);
+        let closestDist=0.55,closest=null;
+        for(let lbl of tagLabels){
+            let pos=lbl.position,dir=raycaster.ray.direction,org=raycaster.ray.origin;
+            let to=new THREE.Vector3().subVectors(pos,org),t=to.dot(dir);
+            let cp=org.clone().add(dir.clone().multiplyScalar(t));
+            let dist=cp.distanceTo(pos);
+            if(dist<closestDist){closestDist=dist;closest=lbl;}
+        }
+        if(closest){
+            logVerbose(`🖱️ Raycast: closest dist=${closestDist.toFixed(3)} → ${closest.userData.repo.name}`);
+        }
+        if(closest&&closest!==currentHovered){
+            if(currentHovered?.element)currentHovered.element.style.transform='';
+            currentHovered=closest;
+            showRepoInfo(closest.userData.repo);
+            if(closest.element)closest.element.style.transform='scale(1.05)';
+            logVerbose(`✨ HOVER START: ${closest.userData.repo.name}`);
+        }else if(!closest&&currentHovered){
+            if(currentHovered.element)currentHovered.element.style.transform='';
+            currentHovered=null;
+            showRepoInfo(null);
+            logVerbose(`✨ HOVER END`);
+        }
+    });
+    window.addEventListener('click',(e)=>{
+        let rect=renderer.domElement.getBoundingClientRect();
+        mouse.x=((e.clientX-rect.left)/rect.width)*2-1;
+        mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
+        raycaster.setFromCamera(mouse,camera);
+        let closestDist=0.55,clicked=null;
+        for(let lbl of tagLabels){
+            let pos=lbl.position,dir=raycaster.ray.direction,org=raycaster.ray.origin;
+            let to=new THREE.Vector3().subVectors(pos,org),t=to.dot(dir);
+            let cp=org.clone().add(dir.clone().multiplyScalar(t));
+            let dist=cp.distanceTo(pos);
+            if(dist<closestDist){closestDist=dist;clicked=lbl;}
+        }
+        if(clicked){
+            let repo=clicked.userData.repo;
+            logVerbose(`🖱️ CLICK on: ${repo.name} → opening ${repo.url}`);
+            window.open(repo.url,'_blank');
+        }
+    });
+}
+window.toggleCollapsible=function(h){let c=h.nextElementSibling;c.classList.toggle('active');let i=h.querySelector('.indicator');if(i)i.textContent=c.classList.contains('active')?'▼':'▶';};
+window.downloadLogs=()=>{let blob=new Blob([fullLog.join('\n')],{type:'text/plain'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`verbose_debug_${Date.now()}.log`;a.click();URL.revokeObjectURL(url);};
+window.clearLogs=()=>{debugLog=[];fullLog=[];document.getElementById('debugText').innerText='Logs cleared.';};
+document.getElementById('downloadLogs').addEventListener('click',window.downloadLogs);
+document.getElementById('clearLogs').addEventListener('click',window.clearLogs);
+(async function(){
+    initThreeJS();
+    await fetchRepos();
+    createTagCloud();
+    document.getElementById('searchBtn').addEventListener('click',performSearch);
+    document.getElementById('searchInput').addEventListener('keypress',e=>{if(e.key==='Enter')performSearch();});
+    logVerbose('🚀 Bootstrap complete. Hover over any tag – verbose logs active.');
+})();
 </script>
 </body>
 </html>
