@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>swipswaps · 3D Portfolio & Code Search</title>
+    <title>swipswaps · 3D Portfolio & Repo Search</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -80,7 +80,6 @@
             max-height: 70vh;
             overflow-y: auto;
         }
-        /* Force light text */
         .search-panel, .search-panel * { color: #e8edf5 !important; }
         .result-item {
             background: #0f0f1a !important;
@@ -160,13 +159,13 @@
     <a href="https://github.com/swipswaps" target="_blank">GitHub</a>
     <a href="https://x.com/swipswaps" target="_blank">X/Twitter</a>
 </div>
-<div class="controls-hint">🖱️ Drag to rotate • Tap or click repo to open</div>
+<div class="controls-hint">🖱️ Drag to rotate • Click any repo to open</div>
 
 <div class="container">
     <div class="main-grid">
         <div class="cloud-panel"><div id="canvas-container" style="width:100%; height:100%;"></div></div>
         <div class="search-panel">
-            <!-- ===== REPO SEARCH (ALWAYS WORKS, NO BACKEND NEEDED) ===== -->
+            <!-- ===== REPO SEARCH (ALWAYS WORKS, NO BACKEND) ===== -->
             <div>
                 <h2>🔍 Repo Search</h2>
                 <div class="search-box">
@@ -258,7 +257,7 @@
         `).join('');
     }
 
-    // ----- 3D Cloud (same as before, but with proper disposal) -----
+    // ----- 3D Cloud (with proper disposal and no `data-badge`) -----
     function getLanguageColor(lang) {
         const c = { JavaScript:'#f7df1e', TypeScript:'#3178c6', Python:'#3572A5', Shell:'#89e051', GDScript:'#478cbf', Unknown:'#888', C:'#555555' };
         return c[lang] || '#44aaff';
@@ -312,6 +311,7 @@
     }
 
     function createTagCloud() {
+        // Dispose old resources to prevent memory leak
         tagSprites.forEach(sprite => {
             if (sprite.material?.map) sprite.material.map.dispose();
             if (sprite.material) sprite.material.dispose();
@@ -397,7 +397,7 @@
         window.addEventListener('pointerup', onPointerUp);
     }
 
-    // ----- Backend detection (optional) -----
+    // ----- Backend detection (optional, static port 3001) -----
     const BACKEND_URL = 'http://localhost:3001';
     let backendOnline = false;
     async function checkBackend() {
@@ -456,13 +456,13 @@
     // ----- Bootstrap -----
     initThreeJS();
     createTagCloud();
-    // Repo search
+    // Repo search (client side, always works)
     document.getElementById('repo-search-btn').addEventListener('click', () => {
         const q = document.getElementById('repo-query').value;
         displayRepoResults(fuzzySearchRepos(q));
     });
     document.getElementById('repo-query').addEventListener('keypress', (e) => { if(e.key === 'Enter') document.getElementById('repo-search-btn').click(); });
-    // Code search (backend)
+    // Code search (optional backend)
     document.getElementById('code-search-btn').addEventListener('click', performCodeSearch);
     document.getElementById('code-query').addEventListener('keypress', (e) => { if(e.key === 'Enter') performCodeSearch(); });
     checkBackend();
