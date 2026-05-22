@@ -76,10 +76,11 @@
             padding: 1.5rem;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.5rem;
             max-height: 70vh;
             overflow-y: auto;
         }
+        /* Force light text */
         .search-panel, .search-panel * { color: #e8edf5 !important; }
         .result-item {
             background: #0f0f1a !important;
@@ -87,20 +88,14 @@
             padding: 12px;
             border-radius: 12px;
             margin-bottom: 12px;
+            cursor: pointer;
         }
-        .result-item .code-snippet {
-            background: #00000066 !important;
-            color: #e8edf5 !important;
-            padding: 8px;
-            border-radius: 8px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            font-size: 11px;
-            max-height: 120px;
-            overflow-y: auto;
+        .result-item:hover { background: #1a1a2e !important; }
+        .search-box {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
         }
-        .search-panel h2 { color: #5effe0 !important; font-size: 1.25rem; margin-bottom: 0.5rem; }
-        .search-box { display: flex; gap: 8px; }
         .search-box input {
             flex: 1;
             background: #1a1a2e;
@@ -136,20 +131,7 @@
             margin-top: 1rem;
             border-left: 3px solid #5effe0;
         }
-        .instructions code {
-            display: block;
-            background: #00000044;
-            padding: 8px;
-            border-radius: 8px;
-            margin: 8px 0;
-        }
-        .search-results { display: flex; flex-direction: column; gap: 12px; margin-top: 1rem; }
-        .result-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
-            flex-wrap: wrap;
-        }
+        .search-results { display: flex; flex-direction: column; gap: 12px; margin-top: 1rem; max-height: 300px; overflow-y: auto; }
         #canvas-container { width: 100%; height: 100%; }
         .controls-hint {
             position: fixed;
@@ -178,27 +160,32 @@
     <a href="https://github.com/swipswaps" target="_blank">GitHub</a>
     <a href="https://x.com/swipswaps" target="_blank">X/Twitter</a>
 </div>
-<div class="controls-hint">🖱️ Drag to rotate • Tap or double‑click repo to open</div>
+<div class="controls-hint">🖱️ Drag to rotate • Tap or click repo to open</div>
 
 <div class="container">
     <div class="main-grid">
         <div class="cloud-panel"><div id="canvas-container" style="width:100%; height:100%;"></div></div>
         <div class="search-panel">
-            <h2>🔍 Repo Search</h2>
-            <div class="search-box">
-                <input type="text" id="search-input" placeholder="Filter repos (e.g., fedora, observability)...">
-                <button id="search-btn">Search</button>
+            <!-- ===== REPO SEARCH (ALWAYS WORKS, NO BACKEND NEEDED) ===== -->
+            <div>
+                <h2>🔍 Repo Search</h2>
+                <div class="search-box">
+                    <input type="text" id="repo-query" placeholder="e.g., fedora, observability, python">
+                    <button id="repo-search-btn">Search</button>
+                </div>
+                <div id="repo-results" class="search-results"></div>
             </div>
-            <div id="local-results" class="search-results"></div>
-            <div style="margin-top: 1rem; border-top: 1px solid #2a2a3e; padding-top: 1rem;">
-                <h2>🔬 Code Search</h2>
+
+            <!-- ===== ADVANCED CODE SEARCH (OPTIONAL, NEEDS LOCAL BACKEND) ===== -->
+            <div style="border-top: 1px solid #2a2a3e; padding-top: 1rem;">
+                <h2>🔬 Code Search (advanced)</h2>
                 <div id="backend-status">⏳ Checking local backend...</div>
                 <div class="search-box">
-                    <input type="text" id="code-query" placeholder="Search code (requires local backend)" disabled>
+                    <input type="text" id="code-query" placeholder="Search inside code (requires local backend)" disabled>
                     <button id="code-search-btn" disabled>Search Code</button>
                 </div>
                 <div id="code-results" class="search-results"></div>
-                <div id="instructions-panel" style="display: none;"></div>
+                <div id="instructions-panel"></div>
             </div>
         </div>
     </div>
@@ -217,11 +204,7 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    // ============================================================
-    // SINGLE SOURCE OF TRUTH - Master repository list
-    // ============================================================
-    // This list is used for BOTH the 3D cloud AND client-side search.
-    // It includes Fedora repos so search works immediately.
+    // ==================== MASTER REPO LIST (includes Fedora) ====================
     const MASTER_REPOS = [
         { name: "observability-platform", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/observability-platform", date: "2026-05-18" },
         { name: "vscode-llm-multi-provider", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/vscode-llm-multi-provider", date: "2026-05-20" },
@@ -238,33 +221,22 @@
         { name: "balloon-color-plan", language: "JavaScript", stars: 0, url: "https://github.com/swipswaps/balloon-color-plan", date: "2026-05-07" },
         { name: "lossless-ffmpeg-concat", language: "Shell", stars: 0, url: "https://github.com/swipswaps/lossless-ffmpeg-concat", date: "2026-05-05" },
         { name: "Masterclass-TUI", language: "Python", stars: 0, url: "https://github.com/swipswaps/Masterclass-TUI", date: "2026-05-03" },
-        { name: "controller-Unified", language: "C", stars: 0, url: "https://github.com/swipswaps/controller-Unified", date: "2026-05-01" },
-        { name: "deterministic-Network", language: "Python", stars: 0, url: "https://github.com/swipswaps/deterministic-Network", date: "2026-04-25" },
-        { name: "Video-Insight-Server", language: "Python", stars: 0, url: "https://github.com/swipswaps/Video-Insight-Server", date: "2026-04-20" },
-        { name: "Pro-Vista", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/Pro-Vista", date: "2026-04-18" },
-        { name: "GEMMA_4", language: "Python", stars: 0, url: "https://github.com/swipswaps/GEMMA_4", date: "2026-04-15" },
-        { name: "storyboard-studio", language: "TypeScript", stars: 0, url: "https://github.com/swipswaps/storyboard-studio", date: "2026-04-10" }
+        { name: "controller-Unified", language: "C", stars: 0, url: "https://github.com/swipswaps/controller-Unified", date: "2026-05-01" }
     ];
 
     let allRepos = [...MASTER_REPOS];
     let tagSprites = [];
     let scene, camera, renderer, controls;
     let tooltipDiv;
-    let interactionsAttached = false;
 
-    // ============================================================
-    // CLIENT-SIDE FUZZY SEARCH (works instantly, no backend needed)
-    // ============================================================
+    // ----- Client-side fuzzy search -----
     function fuzzySearchRepos(query) {
         if (!query || query.length < 2) return [];
-        const lowerQuery = query.toLowerCase();
+        const lower = query.toLowerCase();
         return allRepos
             .map(repo => {
-                let score = 0;
-                const nameLower = repo.name.toLowerCase();
-                if (nameLower.includes(lowerQuery)) score = 1.0;
-                else if (repo.language.toLowerCase().includes(lowerQuery)) score = 0.6;
-                if (score > 0) return { ...repo, score };
+                if (repo.name.toLowerCase().includes(lower)) return { ...repo, score: 1 };
+                if (repo.language.toLowerCase().includes(lower)) return { ...repo, score: 0.6 };
                 return null;
             })
             .filter(r => r)
@@ -272,57 +244,21 @@
             .slice(0, 20);
     }
 
-    function displayLocalResults(results, query) {
-        const container = document.getElementById('local-results');
+    function displayRepoResults(results) {
+        const container = document.getElementById('repo-results');
         if (!results.length) {
             container.innerHTML = '<div style="color:#aaa;">📭 No matching repositories.</div>';
             return;
         }
         container.innerHTML = results.map(r => `
-            <div class="result-item" onclick="window.open('${r.url}', '_blank')" style="cursor:pointer;">
-                <div class="result-header">
-                    <strong>📁 ${r.name}</strong>
-                    <span style="color:#5effe0;">${r.language}</span>
-                </div>
-                <div>⭐ ${r.stars} stars · 📅 ${r.date}</div>
+            <div class="result-item" onclick="window.open('${r.url}', '_blank')">
+                <div><strong>📁 ${r.name}</strong> <span style="color:#5effe0;">${r.language}</span></div>
+                <div style="font-size:11px;">⭐ ${r.stars} stars · 📅 ${r.date}</div>
             </div>
         `).join('');
     }
 
-    // ============================================================
-    // TRY TO FETCH REAL DATA (background, doesn't block)
-    // ============================================================
-    async function fetchRealRepos() {
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
-            const res = await fetch('https://api.github.com/users/swipswaps/repos?sort=pushed&direction=desc&per_page=50', { signal: controller.signal });
-            clearTimeout(timeoutId);
-            if (res.ok) {
-                const data = await res.json();
-                if (data && data.length > 0) {
-                    const newRepos = data.map(r => ({
-                        name: r.name,
-                        language: r.language || 'Unknown',
-                        stars: r.stargazers_count || 0,
-                        url: r.html_url,
-                        date: r.pushed_at ? r.pushed_at.slice(0,10) : '2026-01-01'
-                    }));
-                    // Only update if different
-                    if (JSON.stringify(newRepos) !== JSON.stringify(allRepos)) {
-                        allRepos = newRepos;
-                        createTagCloud(); // Refresh cloud with real data
-                    }
-                }
-            }
-        } catch(e) {
-            // Silently keep using MASTER_REPOS
-        }
-    }
-
-    // ============================================================
-    // THREE.JS CLOUD (with proper resource cleanup)
-    // ============================================================
+    // ----- 3D Cloud (same as before, but with proper disposal) -----
     function getLanguageColor(lang) {
         const c = { JavaScript:'#f7df1e', TypeScript:'#3178c6', Python:'#3572A5', Shell:'#89e051', GDScript:'#478cbf', Unknown:'#888', C:'#555555' };
         return c[lang] || '#44aaff';
@@ -357,7 +293,7 @@
         scene.add(stars);
         
         tooltipDiv = document.createElement('div');
-        tooltipDiv.style.cssText = 'position:fixed;background:#0a0f1aee;backdrop-filter:blur(12px);color:#e8edf5;padding:8px 16px;border-radius:16px;border-left:3px solid #5effe0;font-size:12px;font-family:monospace;pointer-events:none;z-index:200;display:none;';
+        tooltipDiv.style.cssText = 'position:fixed;background:#0a0f1aee;backdrop-filter:blur(12px);color:#e8edf5;padding:8px 16px;border-radius:16px;border-left:3px solid #5effe0;font-size:12px;pointer-events:none;z-index:200;display:none;';
         document.body.appendChild(tooltipDiv);
         
         function animate() {
@@ -376,15 +312,13 @@
     }
 
     function createTagCloud() {
-        // Clean up old resources properly (prevent memory leak)
         tagSprites.forEach(sprite => {
-            if (sprite.material && sprite.material.map) sprite.material.map.dispose();
+            if (sprite.material?.map) sprite.material.map.dispose();
             if (sprite.material) sprite.material.dispose();
             scene.remove(sprite);
         });
         tagSprites = [];
         if(!allRepos.length) return;
-        
         const radius = 4.0;
         const golden = (1+Math.sqrt(5))/2;
         allRepos.forEach((repo, idx) => {
@@ -417,32 +351,27 @@
         attachInteractionsOnce();
     }
 
-    // Interactions attached ONCE, not on every rebuild
+    let interactionsAttached = false;
     function attachInteractionsOnce() {
         if (interactionsAttached) return;
         interactionsAttached = true;
-        
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         const canvas = renderer.domElement;
-
         function getRepoFromEvent(clientX, clientY) {
             mouse.x = (clientX / canvas.clientWidth) * 2 - 1;
             mouse.y = -(clientY / canvas.clientHeight) * 2 + 1;
             raycaster.setFromCamera(mouse, camera);
             const hits = raycaster.intersectObjects(tagSprites);
-            if (hits.length && hits[0].object.userData?.repo) {
-                return hits[0].object.userData.repo;
-            }
+            if (hits.length && hits[0].object.userData?.repo) return hits[0].object.userData.repo;
             return null;
         }
-
         const onMouseMove = (e) => {
             if (!tagSprites.length) return;
             const repo = getRepoFromEvent(e.clientX, e.clientY);
             if (repo) {
                 tooltipDiv.style.display = 'block';
-                tooltipDiv.innerHTML = `<strong>${repo.name}</strong><br>📝 ${repo.language}<br>⭐ ${repo.stars}<br>📅 ${repo.date}<br><span style="font-size:10px;">⚡ Tap or click to open</span>`;
+                tooltipDiv.innerHTML = `<strong>${repo.name}</strong><br>📝 ${repo.language}<br>⭐ ${repo.stars}<br>📅 ${repo.date}<br>⚡ Click to open`;
                 tooltipDiv.style.left = (e.clientX + 15) + 'px';
                 tooltipDiv.style.top = (e.clientY + 20) + 'px';
                 canvas.style.cursor = 'pointer';
@@ -451,35 +380,26 @@
                 canvas.style.cursor = 'default';
             }
         };
-
-        let pointerDownPos = null, pointerDownTime = 0;
-        const onPointerDown = (e) => {
-            pointerDownPos = { x: e.clientX, y: e.clientY };
-            pointerDownTime = Date.now();
-        };
+        let downPos = null, downTime = 0;
+        const onPointerDown = (e) => { downPos = { x: e.clientX, y: e.clientY }; downTime = Date.now(); };
         const onPointerUp = (e) => {
-            if (!pointerDownPos) return;
-            const dx = Math.abs(e.clientX - pointerDownPos.x);
-            const dy = Math.abs(e.clientY - pointerDownPos.y);
-            const duration = Date.now() - pointerDownTime;
+            if (!downPos) return;
+            const dx = Math.abs(e.clientX - downPos.x), dy = Math.abs(e.clientY - downPos.y);
+            const duration = Date.now() - downTime;
             if (dx < 10 && dy < 10 && duration < 500) {
                 const repo = getRepoFromEvent(e.clientX, e.clientY);
                 if (repo && repo.url) window.open(repo.url, '_blank');
             }
-            pointerDownPos = null;
+            downPos = null;
         };
-
         window.addEventListener('mousemove', onMouseMove);
         window.addEventListener('pointerdown', onPointerDown);
         window.addEventListener('pointerup', onPointerUp);
     }
 
-    // ============================================================
-    // BACKEND DETECTION (for code search - optional enhancement)
-    // ============================================================
+    // ----- Backend detection (optional) -----
     const BACKEND_URL = 'http://localhost:3001';
     let backendOnline = false;
-
     async function checkBackend() {
         const statusDiv = document.getElementById('backend-status');
         try {
@@ -489,7 +409,7 @@
                 statusDiv.innerHTML = '<span class="status-badge status-online">✅ Code search backend available</span>';
                 document.getElementById('code-query').disabled = false;
                 document.getElementById('code-search-btn').disabled = false;
-                document.getElementById('instructions-panel').style.display = 'none';
+                document.getElementById('instructions-panel').innerHTML = '';
                 return;
             }
         } catch(e) {}
@@ -500,9 +420,9 @@
         document.getElementById('instructions-panel').innerHTML = `
             <div class="instructions">
                 <strong>🔬 Advanced Code Search</strong><br>
-                <span style="font-size:11px;">To search inside code files (functions, classes, etc.), run the local backend:</span>
+                <span style="font-size:11px;">To search inside code files, run the local backend:</span>
                 <code>git clone https://github.com/swipswaps/swipswaps-portfolio-showcase.git<br>cd swipswaps-portfolio-showcase<br>npm install<br>npm start</code>
-                <span style="font-size:11px;">Then refresh this page. The repo name search above always works.</span>
+                <span style="font-size:11px;">The repo name search above always works.</span>
             </div>
         `;
     }
@@ -512,61 +432,39 @@
         const query = document.getElementById('code-query').value.trim();
         if(query.length < 2) return;
         const resultsDiv = document.getElementById('code-results');
-        resultsDiv.innerHTML = '<div style="color:#88aacc;">🔍 Searching code...</div>';
+        resultsDiv.innerHTML = '<div>🔍 Searching code...</div>';
         try {
             const res = await fetch(`${BACKEND_URL}/api/search-code?q=${encodeURIComponent(query)}`);
             const data = await res.json();
             if(data.results && data.results.length) {
                 resultsDiv.innerHTML = data.results.map(r => `
                     <div class="result-item">
-                        <div class="result-header">
-                            <strong>📁 ${r.repo_name}</strong>
-                            <span style="color:#5effe0;">${Math.round((r.similarity||0.5)*100)}% match</span>
-                        </div>
-                        <div><code>${r.file_path}</code> – ${r.chunk_name || 'code'}</div>
-                        <div class="code-snippet">${escapeHtml(r.content.substring(0,400))}${r.content.length>400?'…':''}</div>
+                        <div><strong>📁 ${r.repo_name}</strong> – ${r.file_path}</div>
+                        <div class="code-snippet" style="background:#000; padding:5px; border-radius:5px; margin-top:5px; font-size:10px;">${escapeHtml(r.content.substring(0,200))}...</div>
                     </div>
                 `).join('');
             } else {
-                resultsDiv.innerHTML = '<div style="color:#aaa;">📭 No matching code. Try "backend", "websocket", or "psutil".</div>';
+                resultsDiv.innerHTML = '<div>📭 No matching code.</div>';
             }
         } catch(err) {
-            resultsDiv.innerHTML = '<div style="color:#ff8888;">⚠️ Backend error. Make sure server is running.</div>';
+            resultsDiv.innerHTML = '<div>⚠️ Backend error.</div>';
         }
     }
 
-    function escapeHtml(str) {
-        return str.replace(/[&<>]/g, function(m) {
-            if(m === '&') return '&amp;';
-            if(m === '<') return '&lt;';
-            if(m === '>') return '&gt;';
-            return m;
-        });
-    }
+    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
 
-    // ============================================================
-    // INITIALIZATION
-    // ============================================================
+    // ----- Bootstrap -----
     initThreeJS();
     createTagCloud();
-    
-    // Client-side search (repo names only - works everywhere)
-    const searchInput = document.getElementById('search-input');
-    const searchBtn = document.getElementById('search-btn');
-    function doLocalSearch() {
-        const query = searchInput.value;
-        const results = fuzzySearchRepos(query);
-        displayLocalResults(results, query);
-    }
-    searchBtn.addEventListener('click', doLocalSearch);
-    searchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') doLocalSearch(); });
-    
-    // Optional backend code search
+    // Repo search
+    document.getElementById('repo-search-btn').addEventListener('click', () => {
+        const q = document.getElementById('repo-query').value;
+        displayRepoResults(fuzzySearchRepos(q));
+    });
+    document.getElementById('repo-query').addEventListener('keypress', (e) => { if(e.key === 'Enter') document.getElementById('repo-search-btn').click(); });
+    // Code search (backend)
     document.getElementById('code-search-btn').addEventListener('click', performCodeSearch);
     document.getElementById('code-query').addEventListener('keypress', (e) => { if(e.key === 'Enter') performCodeSearch(); });
-    
-    // Fetch real data in background (doesn't block UI)
-    fetchRealRepos();
     checkBackend();
 </script>
 </body>
