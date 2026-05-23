@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>swipswaps · 3D Portfolio – Verbose Logs + Readable UI</title>
+    <title>swipswaps · 3D Portfolio – Locked Selection</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{background:radial-gradient(circle at 20% 30%,#0a0f1a,#03050a);font-family:system-ui,sans-serif;overflow:hidden}
@@ -20,42 +20,58 @@
         .panel-header{padding:16px 18px;border-bottom:1px solid rgba(94,255,224,0.15)}
         .panel-header h2{color:#5effe0;font-size:1.1rem}
         .panel-scroll{flex:1;overflow-y:auto;padding:14px 16px}
-        .status-badge{font-size:11px;padding:4px 10px;border-radius:20px;display:inline-block;margin-bottom:14px}
+        .status-badge{font-size:11px;padding:4px 10px;border-radius:20px;display:inline-block;margin-bottom:14px;font-weight:500}
         .online{background:rgba(30,70,50,0.9);color:#5effe0;border:1px solid #5effe0}
         .offline{background:rgba(70,40,40,0.9);color:#ffaa88;border:1px solid #ffaa88}
         .search-area{background:#0a0a14;border:1px solid #2a2a3e;border-radius:60px;padding:8px 16px;margin-bottom:18px;display:flex;gap:8px}
-        .search-area input{flex:1;background:transparent;border:none;color:white;font-family:monospace;outline:none}
-        .search-area button{background:#2e7d64;color:#e8edf5;border:none;border-radius:40px;padding:5px 16px;cursor:pointer}
+        .search-area input{flex:1;background:transparent;border:none;color:white;font-family:monospace;outline:none;font-size:13px}
+        .search-area input::placeholder{color:#777}
+        .search-area button{background:#2e7d64;color:#e8edf5;border:none;border-radius:40px;padding:5px 16px;cursor:pointer;font-weight:600}
         .search-area button:hover{background:#5effe0;color:#0a0f1a}
         .collapsible{margin-bottom:18px;border:1px solid rgba(94,255,224,0.2);border-radius:16px;overflow:hidden}
         .collapsible-header{background:rgba(15,15,26,0.8);padding:10px 14px;cursor:pointer;color:#5effe0;display:flex;justify-content:space-between}
-        .collapsible-content{padding:12px 14px;background:rgba(8,12,22,0.7);display:none}
+        .collapsible-content{padding:12px 14px;background:rgba(8,12,22,0.5);display:none}
         .collapsible-content.active{display:block}
         .repo-current{background:rgba(10,10,20,0.9);border-radius:14px;padding:10px 12px;border-left:3px solid #5effe0}
         .repo-current-name{font-size:14px;font-weight:700;color:#5effe0}
-        .repo-current-details{font-size:11px;color:#88aacc}
+        .repo-current-details{font-size:11px;color:#aaccff;margin-top:5px}
         .section-title{font-size:11px;font-weight:700;color:#5effe0;margin:10px 0 6px;text-transform:uppercase}
-        .related-item{background:rgba(20,20,35,0.95);border-radius:12px;padding:8px 12px;margin-bottom:8px;cursor:pointer;border:1px solid #2a2a3e}
-        .related-item:hover{background:#2a2a3e;transform:translateX(4px);border-color:#5effe0}
+        .related-item{
+            background:rgba(20,20,35,0.95);
+            border-radius:12px;
+            padding:8px 12px;
+            margin-bottom:8px;
+            cursor:pointer;
+            border:1px solid #2a2a3e;
+        }
+        .related-item:hover{
+            background:rgba(40,40,60,0.95);
+            border-color:#2a2a3e;
+        }
         .related-name{font-weight:700;font-size:12px;color:#e8edf5}
-        .related-lang{font-size:10px;color:#88aacc}
-        .related-desc{font-size:10px;color:#aaccff}
+        .related-lang{font-size:10px;color:#88aacc;margin-top:2px}
+        .related-desc{font-size:10px;color:#aaccff;margin-top:2px}
         .code-snippet{background:#0a0a0f;border-radius:10px;padding:8px 10px;font-family:monospace;font-size:10px;color:#b8ffb8;border:1px solid #2a2a3e}
         .empty-message{color:#aaa;text-align:center;padding:20px}
-        .hint{position:fixed;bottom:14px;right:18px;background:rgba(0,0,0,0.7);padding:5px 14px;border-radius:40px;font-size:10px;color:#888;z-index:200}
+        .hint{position:fixed;bottom:14px;right:18px;background:rgba(0,0,0,0.7);padding:5px 14px;border-radius:40px;font-size:10px;color:#ccc;z-index:200}
         .debug-panel{position:fixed;bottom:14px;left:18px;background:rgba(0,0,0,0.9);backdrop-filter:blur(8px);padding:8px 12px;border-radius:12px;font-family:monospace;font-size:10px;color:#0f0;z-index:300;max-width:380px;pointer-events:auto;border:1px solid #ff66cc;max-height:250px;overflow-y:auto}
         .debug-panel button{background:#2e7d64;border:none;color:white;padding:2px 8px;border-radius:8px;cursor:pointer;margin:2px;font-size:9px}
+        .css2d-label-hover {
+            box-shadow: 0 0 12px rgba(94,255,224,0.7);
+            border-color: #5effe0 !important;
+            transition: all 0.1s ease;
+        }
     </style>
 </head>
 <body>
 <div class="header"><h1>José Melendez</h1><p>DevOps Data Scientist · AI-Augmented Reliability Engineer</p></div>
 <div class="social-links"><a href="https://github.com/swipswaps" target="_blank">GitHub</a><a href="https://x.com/swipswaps" target="_blank">X/Twitter</a></div>
-<div class="hint">🖱️ Drag to rotate • Hover any tag → see related info</div>
+<div class="hint">🖱️ Drag to rotate • Single‑click to lock repo • Hover does nothing once locked • Double‑click to open GitHub • Right‑click enabled</div>
 <div class="main-layout"><div class="canvas-panel"><div id="canvas-container"></div></div>
-<div class="info-panel"><div class="panel-header"><h2>🔍 Code Explorer</h2><p>Hover repos to see related code • Search any term</p></div>
-<div class="panel-scroll"><div id="status-area"></div><div class="search-area"><input type="text" id="searchInput" placeholder="🔎 Search..."><button id="searchBtn">Search</button></div>
-<div id="hoverSection" class="collapsible"><div class="collapsible-header" onclick="toggleCollapsible(this)"><span>📍 Currently Hovering</span><span class="indicator">▼</span></div><div class="collapsible-content active" id="hoverContent"><div class="empty-message">✨ Hover over any repository</div></div></div>
-<div id="searchSection" class="collapsible"><div class="collapsible-header" onclick="toggleCollapsible(this)"><span>🔎 Search Results</span><span class="indicator">▼</span></div><div class="collapsible-content active" id="searchResults"><div class="empty-message">Enter a search term above</div></div></div></div></div></div>
+<div class="info-panel"><div class="panel-header"><h2>🔍 Code Explorer</h2><p>Single‑click a repo to lock it – then hover anywhere without changing view</p></div>
+<div class="panel-scroll" id="panel-scroll"><div id="status-area"></div><div class="search-area"><input type="text" id="searchInput" placeholder="🔎 Search..."><button id="searchBtn">Search</button></div>
+<div id="hoverSection" class="collapsible"><div class="collapsible-header" onclick="toggleCollapsible(this)"><span>📍 Repository Info</span><span class="indicator">▼</span></div><div class="collapsible-content active" id="hoverContent"><div class="empty-message">✨ Click any repository to lock it</div></div></div>
+<div id="searchSection" class="collapsible"><div class="collapsible-header" onclick="toggleCollapsible(this)"><span>🔎 Search Results</span><span class="indicator">▼</span></div><div class="collapsible-content" id="searchResults"></div></div></div></div></div>
 <div class="debug-panel" id="debugPanel"><div><strong>📡 VERBOSE LOGS</strong> <button id="downloadLogs">📥 Save</button> <button id="clearLogs">🗑️ Clear</button></div><div id="debugText">Initializing...</div></div>
 <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.128.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/" } }</script>
 <script type="module">
@@ -69,45 +85,81 @@ window.addEventListener('error',e=>logVerbose(`🔥 ERROR: ${e.message}`));
 window.addEventListener('unhandledrejection',e=>logVerbose(`💔 REJECTION: ${e.reason}`));
 
 let allRepos=[],tagLabels=[],scene,camera,renderer,labelRenderer,controls;
+let selectedRepo = null;     // Locked repository (set by single click)
+let hoveredRepo = null;      // Temporarily hovered (only used when no selection)
+const scrollContainer = document.getElementById('panel-scroll');
+
+document.addEventListener('contextmenu', (e) => true);
+
 async function fetchRepos(){
     logVerbose('📡 Fetching repos from GitHub...');
     try{
         let r=await fetch('https://api.github.com/users/swipswaps/repos?sort=pushed&direction=desc&per_page=50');
         if(r.ok){
             let d=await r.json();
-            allRepos=d.map(r=>({name:r.name,language:r.language||'Unknown',stars:r.stargazers_count||0,url:r.html_url,date:r.pushed_at?r.pushed_at.slice(0,10):'2026-01-01',description:r.description||''}));
+            allRepos = d.map(repo => {
+                let tagsSet = new Set();
+                if(repo.language) tagsSet.add(repo.language.toLowerCase());
+                repo.name.toLowerCase().split(/[^a-z0-9]+/).forEach(w => { if(w.length>2) tagsSet.add(w); });
+                if(repo.description) {
+                    repo.description.toLowerCase().split(/[^a-z0-9]+/).forEach(w => { if(w.length>3) tagsSet.add(w); });
+                }
+                return {
+                    name: repo.name,
+                    language: repo.language || 'Unknown',
+                    stars: repo.stargazers_count || 0,
+                    url: repo.html_url,
+                    date: repo.pushed_at ? repo.pushed_at.slice(0,10) : '2026-01-01',
+                    description: repo.description || '',
+                    tags: Array.from(tagsSet)
+                };
+            });
             logVerbose(`✅ Loaded ${allRepos.length} repos from GitHub`);
             return;
         }
         throw new Error();
-    }catch(e){
-        logVerbose(`⚠️ GitHub API failed, using ${allRepos.length} fallback repos`);
-        allRepos=[
-            {name:"GEMMA_4_FORGE_FEDORA_43-",language:"TypeScript",stars:0,url:"#",date:"2026-04-19",description:"Gemma 4 AI forge"},
-            {name:"observability-platform",language:"TypeScript",stars:0,url:"#",date:"2026-05-18",description:"Full-stack observability"},
-            {name:"storyboard-studio",language:"HTML",stars:0,url:"#",date:"2026-05-14",description:"Storyboard studio"},
-            {name:"sys-inspector",language:"Python",stars:0,url:"#",date:"2026-04-12",description:"System forensics"},
-            {name:"bcm4331-forensic-controller",language:"Shell",stars:0,url:"#",date:"2026-04-10",description:"Self-healing WiFi"}
+    } catch(e){
+        logVerbose(`⚠️ GitHub API failed, using fallback repos`);
+        allRepos = [
+            {name:"GEMMA_4_FORGE_FEDORA_43-", language:"TypeScript", stars:0, url:"#", date:"2026-04-19", description:"Gemma 4 AI forge", tags:["fedora","gemma","ai","typescript"]},
+            {name:"observability-platform", language:"TypeScript", stars:0, url:"#", date:"2026-05-18", description:"Full-stack observability", tags:["observability","typescript"]},
+            {name:"storyboard-studio", language:"HTML", stars:0, url:"#", date:"2026-05-14", description:"Storyboard studio", tags:["studio","html"]},
+            {name:"sys-inspector", language:"Python", stars:0, url:"#", date:"2026-04-12", description:"System forensics", tags:["forensic","python"]},
+            {name:"bcm4331-forensic-controller", language:"Shell", stars:0, url:"#", date:"2026-04-10", description:"Self-healing WiFi", tags:["bcm4331","forensic","shell","self-healing"]}
         ];
     }
 }
+
 function showRepoInfo(repo){
-    let c=document.getElementById('hoverContent');
+    const c = document.getElementById('hoverContent');
     if(!repo){
-        c.innerHTML='<div class="empty-message">✨ Hover over any repository</div>';
-        logVerbose(`🖱️ Hover ended – cleared panel`);
+        c.innerHTML='<div class="empty-message">✨ Click any repository to lock it</div>';
         return;
     }
-    logVerbose(`🖱️ Hover on: ${repo.name}`);
+    const savedScroll = scrollContainer ? scrollContainer.scrollTop : 0;
     let html=`<div class="repo-current"><div class="repo-current-name">📁 ${repo.name}</div><div class="repo-current-details">${repo.language} · ⭐ ${repo.stars} stars · ${repo.date}</div>${repo.description?`<div class="repo-current-details">${repo.description}</div>`:''}</div>`;
-    let related=allRepos.filter(r=>r.name!==repo.name).slice(0,6);
+    let related=allRepos.filter(r=>r.name!==repo.name && r.tags && repo.tags && repo.tags.some(t=>r.tags.includes(t))).slice(0,6);
     if(related.length){
         html+=`<div class="section-title">🔗 Related repositories</div>`;
         for(let rel of related) html+=`<div class="related-item" onclick="window.open('${rel.url}','_blank')"><div class="related-name">${rel.name}</div><div class="related-lang">${rel.language} · ⭐ ${rel.stars}</div>${rel.description?`<div class="related-desc">${rel.description.slice(0,80)}</div>`:''}</div>`;
-    }else html+=`<div class="empty-message">No related repos.</div>`;
-    html+=`<div class="section-title">📝 Code example</div><div class="code-snippet">def analyze():\n    return "AI-assisted reliability"</div>`;
+    }else html+=`<div class="empty-message">No related repos found.</div>`;
+    html+=`<div class="section-title">📝 Code pattern example</div><div class="code-snippet">def analyze():\n    return "AI-assisted reliability"</div>`;
     c.innerHTML=html;
+    if (scrollContainer) scrollContainer.scrollTop = savedScroll;
 }
+
+function updateDisplay() {
+    // If a repo is selected (locked), always show it – ignore hover
+    if (selectedRepo) {
+        showRepoInfo(selectedRepo);
+    } else if (hoveredRepo) {
+        // Only when nothing is selected, show the hovered repo temporarily
+        showRepoInfo(hoveredRepo);
+    } else {
+        showRepoInfo(null);
+    }
+}
+
 async function performSearch(){
     let q=document.getElementById('searchInput').value.trim().toLowerCase();
     let r=document.getElementById('searchResults');
@@ -117,6 +169,7 @@ async function performSearch(){
         return;
     }
     logVerbose(`🔎 Searching for: "${q}"`);
+    const savedScroll = scrollContainer ? scrollContainer.scrollTop : 0;
     r.innerHTML=`<div class="section-title">🔍 Results for "${q}"</div>`;
     let matches=allRepos.filter(r=>r.name.toLowerCase().includes(q)||(r.language&&r.language.toLowerCase().includes(q))||(r.description&&r.description.toLowerCase().includes(q)));
     if(matches.length){
@@ -126,7 +179,9 @@ async function performSearch(){
         r.innerHTML+=`<div class="empty-message">No matches.</div>`;
         logVerbose(`❌ No matches found`);
     }
+    if (scrollContainer) scrollContainer.scrollTop = savedScroll;
 }
+
 function initThreeJS(){
     let container=document.getElementById('canvas-container');
     let w=container.clientWidth,h=container.clientHeight;
@@ -135,7 +190,7 @@ function initThreeJS(){
     renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(w,h);container.appendChild(renderer.domElement);
     labelRenderer=new CSS2DRenderer();labelRenderer.setSize(w,h);
     labelRenderer.domElement.style.position='absolute';labelRenderer.domElement.style.top='0px';labelRenderer.domElement.style.left='0px';
-    labelRenderer.domElement.style.pointerEvents='none'; // let canvas receive mouse events
+    labelRenderer.domElement.style.pointerEvents='none';
     container.appendChild(labelRenderer.domElement);
     controls=new OrbitControls(camera,renderer.domElement);
     controls.enableDamping=true;controls.autoRotate=true;controls.autoRotateSpeed=0.6;controls.enableZoom=true;controls.target.set(0,0,0);
@@ -149,7 +204,9 @@ function initThreeJS(){
     window.addEventListener('resize',()=>{let w=container.clientWidth,h=container.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);labelRenderer.setSize(w,h);});
     logVerbose('✅ Three.js initialized');
 }
+
 function getLanguageColor(lang){let c={JavaScript:'#f7df1e',TypeScript:'#3178c6',Python:'#3572A5',Shell:'#89e051',HTML:'#e34c26',CSS:'#563d7c'};return c[lang]||'#44aaff';}
+
 function createTagCloud(){
     tagLabels.forEach(l=>scene.remove(l));tagLabels=[];
     if(!allRepos.length){logVerbose('❌ No repos!');return;}
@@ -167,13 +224,13 @@ function createTagCloud(){
         div.style.color='#ffffff';
         div.style.fontSize='14px';
         div.style.fontWeight='600';
-        div.style.transition='all 0.15s';
+        div.style.transition='all 0.1s ease';
         div.style.backdropFilter='blur(4px)';
         div.style.whiteSpace='nowrap';
         div.style.maxWidth='240px';
         div.style.overflow='hidden';
         div.style.textOverflow='ellipsis';
-        div.style.pointerEvents='none'; // raycasting handles interactions
+        div.style.pointerEvents='none';
         let dn=repo.name.length>24?repo.name.slice(0,21)+'...':repo.name;
         div.innerHTML=`<strong>${dn}</strong><br><span style="font-size:11px; color:${getLanguageColor(repo.language)};">${repo.language} ★ ${repo.stars}</span><br><span style="font-size:9px; color:#88aacc;">${repo.date}</span>`;
         let label=new CSS2DObject(div);
@@ -181,73 +238,133 @@ function createTagCloud(){
         label.userData={repo};
         scene.add(label);
         tagLabels.push(label);
-        logVerbose(`🏷️ Label added: ${repo.name} at (${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)})`);
     });
     logVerbose(`🎨 Total CSS2D labels: ${tagLabels.length}`);
 
-    // Raycaster for hover/click with verbose logging
-    let raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2(),currentHovered=null;
-    window.addEventListener('mousemove',(e)=>{
-        let rect=renderer.domElement.getBoundingClientRect();
-        mouse.x=((e.clientX-rect.left)/rect.width)*2-1;
-        mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
-        raycaster.setFromCamera(mouse,camera);
-        let closestDist=0.55,closest=null;
-        for(let lbl of tagLabels){
-            let pos=lbl.position,dir=raycaster.ray.direction,org=raycaster.ray.origin;
-            let to=new THREE.Vector3().subVectors(pos,org),t=to.dot(dir);
-            let cp=org.clone().add(dir.clone().multiplyScalar(t));
-            let dist=cp.distanceTo(pos);
-            if(dist<closestDist){closestDist=dist;closest=lbl;}
+    let currentHoverElement = null;
+    window.addEventListener('mousemove', (e) => {
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+        let hoveredLabel = null;
+        let closestDistance = Infinity;
+        for (const lbl of tagLabels) {
+            const elem = lbl.element;
+            if (!elem) continue;
+            const rect = elem.getBoundingClientRect();
+            if (mouseX >= rect.left && mouseX <= rect.right && mouseY >= rect.top && mouseY <= rect.bottom) {
+                const distToCamera = camera.position.distanceTo(lbl.position);
+                if (distToCamera < closestDistance) {
+                    closestDistance = distToCamera;
+                    hoveredLabel = lbl;
+                }
+            }
         }
-        if(closest){
-            logVerbose(`🖱️ Raycast: closest dist=${closestDist.toFixed(3)} → ${closest.userData.repo.name}`);
+        if (currentHoverElement && currentHoverElement !== hoveredLabel?.element) {
+            currentHoverElement.classList.remove('css2d-label-hover');
         }
-        if(closest&&closest!==currentHovered){
-            if(currentHovered?.element)currentHovered.element.style.transform='';
-            currentHovered=closest;
-            showRepoInfo(closest.userData.repo);
-            if(closest.element)closest.element.style.transform='scale(1.05)';
-            logVerbose(`✨ HOVER START: ${closest.userData.repo.name}`);
-        }else if(!closest&&currentHovered){
-            if(currentHovered.element)currentHovered.element.style.transform='';
-            currentHovered=null;
-            showRepoInfo(null);
-            logVerbose(`✨ HOVER END`);
+        if (hoveredLabel && hoveredLabel.element) {
+            if (currentHoverElement !== hoveredLabel.element) {
+                hoveredLabel.element.classList.add('css2d-label-hover');
+                currentHoverElement = hoveredLabel.element;
+            }
+        } else if (currentHoverElement) {
+            currentHoverElement = null;
         }
-    });
-    window.addEventListener('click',(e)=>{
-        let rect=renderer.domElement.getBoundingClientRect();
-        mouse.x=((e.clientX-rect.left)/rect.width)*2-1;
-        mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
-        raycaster.setFromCamera(mouse,camera);
-        let closestDist=0.55,clicked=null;
-        for(let lbl of tagLabels){
-            let pos=lbl.position,dir=raycaster.ray.direction,org=raycaster.ray.origin;
-            let to=new THREE.Vector3().subVectors(pos,org),t=to.dot(dir);
-            let cp=org.clone().add(dir.clone().multiplyScalar(t));
-            let dist=cp.distanceTo(pos);
-            if(dist<closestDist){closestDist=dist;clicked=lbl;}
-        }
-        if(clicked){
-            let repo=clicked.userData.repo;
-            logVerbose(`🖱️ CLICK on: ${repo.name} → opening ${repo.url}`);
-            window.open(repo.url,'_blank');
+
+        // Update hovered repo only if there is no selected (locked) repo
+        if (selectedRepo === null) {
+            const newHoveredRepo = hoveredLabel ? hoveredLabel.userData.repo : null;
+            if (newHoveredRepo !== hoveredRepo) {
+                hoveredRepo = newHoveredRepo;
+                updateDisplay();
+                if (hoveredRepo) logVerbose(`🖱️ Hover preview: ${hoveredRepo.name}`);
+                else logVerbose(`✨ Hover end`);
+            }
+        } else {
+            // When a repo is selected, hover does nothing – but we still log if needed
+            // (optional: clear hoveredRepo to avoid confusion)
+            if (hoveredRepo !== null) {
+                hoveredRepo = null;
+                // No need to update display because selectedRepo already shown
+            }
         }
     });
+
+    // Single click: always select the clicked repo and disable hover preview
+    window.addEventListener('click', (e) => {
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+        let clickedLabel = null;
+        let closestDistance = Infinity;
+        for (const lbl of tagLabels) {
+            const elem = lbl.element;
+            if (!elem) continue;
+            const rect = elem.getBoundingClientRect();
+            if (mouseX >= rect.left && mouseX <= rect.right && mouseY >= rect.top && mouseY <= rect.bottom) {
+                const distToCamera = camera.position.distanceTo(lbl.position);
+                if (distToCamera < closestDistance) {
+                    closestDistance = distToCamera;
+                    clickedLabel = lbl;
+                }
+            }
+        }
+        if (clickedLabel) {
+            const repo = clickedLabel.userData.repo;
+            selectedRepo = repo;
+            hoveredRepo = null;   // Clear any hover preview
+            updateDisplay();
+            logVerbose(`🖱️ LOCKED: ${repo.name} (single click – hover disabled)`);
+        }
+    });
+
+    // Double click: open GitHub and also select the repo
+    window.addEventListener('dblclick', (e) => {
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+        let clickedLabel = null;
+        let closestDistance = Infinity;
+        for (const lbl of tagLabels) {
+            const elem = lbl.element;
+            if (!elem) continue;
+            const rect = elem.getBoundingClientRect();
+            if (mouseX >= rect.left && mouseX <= rect.right && mouseY >= rect.top && mouseY <= rect.bottom) {
+                const distToCamera = camera.position.distanceTo(lbl.position);
+                if (distToCamera < closestDistance) {
+                    closestDistance = distToCamera;
+                    clickedLabel = lbl;
+                }
+            }
+        }
+        if (clickedLabel) {
+            const repo = clickedLabel.userData.repo;
+            if (repo.url && repo.url !== '#') {
+                logVerbose(`🖱️ DOUBLE-CLICK: ${repo.name} → ${repo.url}`);
+                window.open(repo.url, '_blank');
+                selectedRepo = repo;
+                hoveredRepo = null;
+                updateDisplay();
+            } else {
+                logVerbose(`⚠️ Double‑click on ${repo.name} has no valid URL`);
+            }
+        }
+    });
+
+    window.addEventListener('contextmenu', (e) => true, false);
 }
+
 window.toggleCollapsible=function(h){let c=h.nextElementSibling;c.classList.toggle('active');let i=h.querySelector('.indicator');if(i)i.textContent=c.classList.contains('active')?'▼':'▶';};
-window.downloadLogs=()=>{let blob=new Blob([fullLog.join('\n')],{type:'text/plain'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`verbose_debug_${Date.now()}.log`;a.click();URL.revokeObjectURL(url);};
+window.downloadLogs=()=>{let blob=new Blob([fullLog.join('\n')],{type:'text/plain'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`locked_selection_${Date.now()}.log`;a.click();URL.revokeObjectURL(url);};
 window.clearLogs=()=>{debugLog=[];fullLog=[];document.getElementById('debugText').innerText='Logs cleared.';};
 document.getElementById('downloadLogs').addEventListener('click',window.downloadLogs);
 document.getElementById('clearLogs').addEventListener('click',window.clearLogs);
+
 (async function(){
     initThreeJS();
     await fetchRepos();
     createTagCloud();
     document.getElementById('searchBtn').addEventListener('click',performSearch);
     document.getElementById('searchInput').addEventListener('keypress',e=>{if(e.key==='Enter')performSearch();});
-    logVerbose('🚀 Bootstrap complete. Hover over any tag – verbose logs active.');
+    logVerbose('🚀 Ready – locked selection mode: click any repo to lock, then hover does nothing.');
 })();
 </script>
 </body>
