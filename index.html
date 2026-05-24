@@ -138,20 +138,38 @@
     });
 
     async function startApp() {
+        // ---------- ENVIRONMENT DETECTION & DYNAMIC API BASE ----------
+        // Port from receipts-ocr project - allows GitHub Pages to reach local backend
+        const getAPIBase = () => {
+            if (typeof window === 'undefined') return 'http://localhost:8000';
+            const hostname = window.location.hostname;
+            // On GitHub Pages, explicitly target localhost
+            if (hostname.includes('github.io')) return 'http://localhost:8000';
+            // Local development
+            if (hostname === 'localhost' || hostname === '127.0.0.1') return 'http://localhost:8000';
+            // LAN access
+            return `http://${hostname}:8000`;
+        };
+        const API_BASE = getAPIBase();
+        window.logToDebug(`🌐 API base URL: ${API_BASE}`);
         window.logToDebug('Starting application...');
         try {
-            const res = await fetch('/api/health');
+            const res = await fetch(`${API_BASE}/api/health`);
             if (res.ok) safeSetInnerHTML('status-area', '<div class="status-badge online">🟢 Server: Online</div>');
-            else throw new Error();
-        } catch(e) { safeSetInnerHTML('status-area', '<div class="status-badge offline">🔴 Server: Offline (fallback)</div>'); }
+            else throw new Error(`Health check returned ${res.status}`);
+        } catch(e) {
+            window.logToDebug(`Health check failed: ${e.message}`, true);
+            safeSetInnerHTML('status-area', '<div class="status-badge offline">🔴 Server: Offline (fallback)</div>');
+        }
 
         let allRepos = [];
         try {
-            const res = await fetch('/api/repos');
+            const res = await fetch(`${API_BASE}/api/repos`);
             if (res.ok) allRepos = await res.json();
-            else throw new Error();
+            else throw new Error(`/api/repos returned ${res.status}`);
             window.logToDebug(`✅ Loaded ${allRepos.length} repos from backend`);
         } catch(e) {
+            window.logToDebug(`Repo fetch failed: ${e.message} – falling back to GitHub API`, true);
             const fallback = await fetch('https://api.github.com/users/swipswaps/repos?sort=pushed&direction=desc&per_page=50');
             const data = await fallback.json();
             allRepos = data.map(repo => ({ name: repo.name, language: repo.language || 'Unknown', stars: repo.stargazers_count || 0, url: repo.html_url, date: repo.pushed_at ? repo.pushed_at.slice(0,10) : '2026-01-01', description: repo.description || '', tags: [] }));
@@ -260,7 +278,7 @@
             if (safeGetElement('panel-scroll')) document.getElementById('panel-scroll').scrollTop = savedScroll;
             if (related.length) {
                 try {
-                    const resp = await fetch(`/api/common-code?repo1=${encodeURIComponent(repo.name)}&repo2=${encodeURIComponent(related[0].name)}`);
+                    const resp = await fetch(`${API_BASE}/api/common-code?repo1=${encodeURIComponent(repo.name)}&repo2=${encodeURIComponent(related[0].name)}`);
                     if (resp.ok) {
                         const data = await resp.json();
                         const codeDiv = document.getElementById('dynamic-code');
@@ -383,7 +401,7 @@
             window.logToDebug(`🔎 Searching: "${q}"`);
             resultsDiv.innerHTML = `<div class="section-title">🔍 Results for "${q}"</div><div class="empty-message">Searching...</div>`;
             try {
-                const resp = await fetch(`/api/search-code?q=${encodeURIComponent(q)}`);
+                const resp = await fetch(`${API_BASE}/api/search-code?q=${encodeURIComponent(q)}`);
                 if (resp.ok) {
                     const data = await resp.json();
                     if (data.results && data.results.length) {
