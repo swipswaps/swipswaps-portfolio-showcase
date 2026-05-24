@@ -64,17 +64,6 @@
     <button id="searchBtn">Search</button></div>
 <div id="hoverSection" class="collapsible"><div class="collapsible-header" onclick="toggleCollapsible(this)"><span>📍 Repository Info</span><span class="indicator">▼</span></div><div class="collapsible-content active" id="hoverContent"><div class="empty-message">✨ Click any repository to lock it</div></div></div>
 <div id="searchSection" class="collapsible"><div class="collapsible-header" onclick="toggleCollapsible(this)"><span>🔎 Search Results</span><span class="indicator">▼</span></div><div class="collapsible-content active" id="searchResults"><div class="empty-message">Search results appear here</div></div></div></div></div></div>
-<div class="debug-panel"
-<script>
-    // Prevent clicks/double-clicks in the right panel from reaching the canvas
-    document.querySelector('.info-panel').addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
-    document.querySelector('.info-panel').addEventListener('dblclick', function(e) {
-        e.stopPropagation();
-    });
-</script>
-
 <div class="debug-panel" id="debugPanel"><div><strong>📡 VERBOSE LOGS</strong> <button id="downloadLogs">📥 Save</button> <button id="clearLogs">🗑️ Clear</button></div><div id="debugText">Initializing...</div></div>
 
 <script>
@@ -133,7 +122,8 @@
             safeSetInnerHTML('hoverContent', '<div class="error-message">Three.js failed to load.</div>');
             return;
         }
-        loadThreeScript(CDN_LIST[currentCdnIndex], callback, () => { currentCdnIndex++; loadThreeWithFallback(callback); });
+                console.log("ATTEMPTING CDN: " + CDN_LIST[currentCdnIndex]);
+        loadThreeScript(CDN_LIST[currentCdnIndex], callback, () => { console.log("CDN FAILED: " + CDN_LIST[currentCdnIndex]); currentCdnIndex++; loadThreeWithFallback(callback); });
     }
 
     function loadAddon(src, name, callback) {
@@ -492,7 +482,6 @@
         document.getElementById('downloadLogs').onclick = window.downloadLogs;
         document.getElementById('clearLogs').onclick = window.clearLogs;
         window.logToDebug('🚀 Application ready. Single-click to lock, double-click to open GitHub.');
-    }
 </script>
 </body>
 </html>
