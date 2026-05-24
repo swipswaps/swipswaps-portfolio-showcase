@@ -171,6 +171,46 @@ app.use((err, req, res, next) => {
 });
 
 // Start server and initialise index
+
+// ----- GITHUB CODE SEARCH (uses GitHub API, requires GITHUB_TOKEN in .env) -----
+app.get('/api/search-github', async (req, res) => {
+  const { q: query, lang = '', page = 1 } = req.query;
+  if (!query) {
+    return res.status(400).json({ error: 'Missing query parameter "q"' });
+  }
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) {
+    return res.status(401).json({ error: 'GITHUB_TOKEN not set in .env' });
+  }
+  // Search only within your repositories (swipswaps/*)
+  let searchQuery = `${query} repo:swipswaps/*`;
+  if (lang) searchQuery += ` language:${lang}`;
+  const url = `https://api.github.com/search/code?q=${encodeURIComponent(searchQuery)}&per_page=30&page=${page}`;
+  try {
+    const fetch = (await import('node-fetch')).default;
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      return res.status(response.status).json({ error: data.message });
+    }
+    const results = data.items.map(item => ({
+      repo: item.repository.full_name,
+      file: item.path,
+      url: item.html_url,
+      score: item.score,
+    }));
+    res.json({ query, lang, page, total_count: data.total_count, results });
+  } catch (err) {
+    console.error('GitHub search error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(port, () => {
   logger.info(`Backend running on http://localhost:${port}`);
   ensureIndex();

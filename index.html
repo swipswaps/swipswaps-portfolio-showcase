@@ -56,9 +56,25 @@
 <div class="hint">🖱️ Drag to rotate • Single‑click to lock • Double‑click to open • Right‑click enabled</div>
 <div class="main-layout"><div class="canvas-panel"><div id="canvas-container"></div></div>
 <div class="info-panel"><div class="panel-header"><h2>🔍 Code Explorer</h2><p>Single‑click to lock – search inside code snippets</p></div>
-<div class="panel-scroll" id="panel-scroll"><div id="status-area"></div><div class="search-area"><input type="text" id="searchInput" placeholder="🔎 Search code snippets..."><button id="searchBtn">Search</button></div>
+<div class="panel-scroll" id="panel-scroll"><div id="status-area"></div><div class="search-area"><input type="text" id="searchInput" placeholder="🔎 Search code snippets...">
+    <select id="searchMode" style="background:#2a2a2a; color:white; border-radius:30px; padding:5px 10px; font-size:12px;">
+        <option value="readme">📄 Search READMEs (local)</option>
+        <option value="github">🔍 Search code (GitHub API) – requires local backend running</option>
+    </select>
+    <button id="searchBtn">Search</button></div>
 <div id="hoverSection" class="collapsible"><div class="collapsible-header" onclick="toggleCollapsible(this)"><span>📍 Repository Info</span><span class="indicator">▼</span></div><div class="collapsible-content active" id="hoverContent"><div class="empty-message">✨ Click any repository to lock it</div></div></div>
 <div id="searchSection" class="collapsible"><div class="collapsible-header" onclick="toggleCollapsible(this)"><span>🔎 Search Results</span><span class="indicator">▼</span></div><div class="collapsible-content active" id="searchResults"><div class="empty-message">Search results appear here</div></div></div></div></div></div>
+<div class="debug-panel"
+<script>
+    // Prevent clicks/double-clicks in the right panel from reaching the canvas
+    document.querySelector('.info-panel').addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    document.querySelector('.info-panel').addEventListener('dblclick', function(e) {
+        e.stopPropagation();
+    });
+</script>
+
 <div class="debug-panel" id="debugPanel"><div><strong>📡 VERBOSE LOGS</strong> <button id="downloadLogs">📥 Save</button> <button id="clearLogs">🗑️ Clear</button></div><div id="debugText">Initializing...</div></div>
 
 <script>
@@ -394,28 +410,60 @@
         });
 
         window.performSearch = async function() {
-            const q = document.getElementById('searchInput').value.trim();
-            const resultsDiv = safeGetElement('searchResults');
-            if (!resultsDiv) return;
-            if (q.length < 2) { resultsDiv.innerHTML = '<div class="empty-message">Enter at least 2 characters</div>'; return; }
-            window.logToDebug(`🔎 Searching: "${q}"`);
-            resultsDiv.innerHTML = `<div class="section-title">🔍 Results for "${q}"</div><div class="empty-message">Searching...</div>`;
-            try {
-                const resp = await fetch(`${API_BASE}/api/search-code?q=${encodeURIComponent(q)}`);
-                if (resp.ok) {
-                    const data = await resp.json();
-                    if (data.results && data.results.length) {
-                        let html = `<div class="section-title">🔍 Results for "${q}"</div>`;
-                        for (let res of data.results) {
-                            const repoInfo = allRepos.find(r => r.name === res.repo_name);
-                            const repoUrl = (repoInfo && repoInfo.url !== '#') ? repoInfo.url : '#';
-                            html += `<div class="related-item" onclick="window.open('${repoUrl}','_blank')"><div class="related-name">📄 ${res.repo_name}</div><div class="related-desc">${res.content.slice(0,100)}...</div></div>`;
-                        }
-                        resultsDiv.innerHTML = html;
-                        window.logToDebug(`📋 Found ${data.results.length} results`);
-                    } else resultsDiv.innerHTML = `<div class="section-title">🔍 Results for "${q}"</div><div class="empty-message">No matches.</div>`;
-                } else resultsDiv.innerHTML = `<div class="empty-message">Search error (backend offline).</div>`;
-            } catch(err) { resultsDiv.innerHTML = `<div class="empty-message">Search failed: ${err.message}</div>`; window.logToDebug(`Search error: ${err.message}`, true); }
+    const q = document.getElementById('searchInput').value.trim();
+    const mode = document.getElementById('searchMode').value;
+    const resultsDiv = safeGetElement('searchResults');
+    if (!resultsDiv) return;
+    if (q.length < 2) { resultsDiv.innerHTML = '<div class="empty-message">Enter at least 2 characters</div>'; return; }
+    window.logToDebug(`🔎 Searching: "${q}" (mode: ${mode})`);
+    resultsDiv.innerHTML = `<div class="section-title">🔍 Results for "${q}"</div><div class="empty-message">Searching...</div>`;
+    try {
+        let url = '';
+        if (mode === 'readme') {
+            url = `/api/search-code?q=${encodeURIComponent(q)}`;
+        } else {
+            url = `/api/search-github?q=${encodeURIComponent(q)}`;
+        }
+        const resp = await fetch(url);
+        if (!resp.ok) {
+            const errText = await resp.text();
+            throw new Error(`${resp.status}: ${errText.substring(0,100)}`);
+        }
+        const data = await resp.json();
+        let results = [];
+        if (mode === 'readme') {
+            results = data.results || [];
+            if (results.length) {
+                let html = `<div class="section-title">🔍 Results for "${q}" (${results.length})</div>`;
+                for (let res of results) {
+                    const repoInfo = allRepos.find(r => r.name === res.repo_name);
+                    const repoUrl = (repoInfo && repoInfo.url !== '#') ? repoInfo.url : '#';
+                    html += `<div class="related-item" onclick="window.open('${repoUrl}','_blank')"><div class="related-name">📄 ${res.repo_name}</div><div class="related-desc">${res.content.slice(0,100)}...</div></div>`;
+                }
+                resultsDiv.innerHTML = html;
+                window.logToDebug(`📋 Found ${results.length} results from READMEs`);
+            } else {
+                resultsDiv.innerHTML = `<div class="section-title">🔍 Results for "${q}"</div><div class="empty-message">No matches in READMEs.</div>`;
+            }
+        } else {
+            // GitHub mode
+            results = data.results || [];
+            if (results.length) {
+                let html = `<div class="section-title">🔍 Results for "${q}" (${data.total_count} total, showing ${results.length})</div>`;
+                for (let res of results) {
+                    html += `<div class="related-item" onclick="window.open('${res.url}','_blank')"><div class="related-name">📁 ${res.repo}</div><div class="related-desc">${res.file} (score: ${res.score.toFixed(2)})</div></div>`;
+                }
+                resultsDiv.innerHTML = html;
+                window.logToDebug(`📋 Found ${results.length} code results from GitHub API`);
+            } else {
+                resultsDiv.innerHTML = `<div class="section-title">🔍 Results for "${q}"</div><div class="empty-message">No code matches found.</div>`;
+            }
+        }
+    } catch(err) {
+        resultsDiv.innerHTML = `<div class="empty-message">Search failed: ${err.message}</div>`;
+        window.logToDebug(`Search error: ${err.message}`, true);
+    }
+}
         };
         document.getElementById('searchBtn').onclick = window.performSearch;
         document.getElementById('searchInput').onkeypress = (e) => { if (e.key === 'Enter') window.performSearch(); };
