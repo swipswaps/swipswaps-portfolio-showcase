@@ -26,3 +26,20 @@ notes/
 # Local database files
 *.db
 *.sqlite
+node_modules/
+*.log
+*.bak
+*.bak_*
+index.html.*.bak
+index_00*.html
+full_capture_*.log
+full_log_*.txt
+verbatim_*.log
+real_console_*.log
+page_console.log
+browser_*.log
+captured_logs.txt
+*.png
+notes/
+*.diagbak
+*.diag2.bak
