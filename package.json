@@ -1,0 +1,40 @@
+{
+  "name": "portfolio-code-search",
+  "version": "1.0.0",
+  "description": "Code search and similarity engine for repositories",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.10.0",
+    "compression": "^1.8.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "envalid": "^8.1.1",
+    "express": "^4.22.2",
+    "express-rate-limit": "^8.5.2",
+    "express-validator": "^7.3.2",
+    "helmet": "^8.2.0",
+    "node-cache": "^5.1.2",
+    "node-fetch": "^3.3.2",
+    "puppeteer": "^25.0.4",
+    "simple-git": "^3.19.1",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swipswaps/swipswaps-portfolio-showcase.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/swipswaps/swipswaps-portfolio-showcase/issues"
+  },
+  "homepage": "https://github.com/swipswaps/swipswaps-portfolio-showcase#readme"
+}
