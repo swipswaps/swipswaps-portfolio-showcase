@@ -43,3 +43,17 @@ captured_logs.txt
 notes/
 *.diagbak
 *.diag2.bak
+*.js
+capture_*.js
+headed_test.js
+playwright_test.js
+stream_*.js
+take_screenshot.js
+test_*.sh
+*.log
+chromium_screenshot.sh
+deploy_and_serve.sh
+docker-compose.yml
+fix-portfolio.sh
+pm2.config.js
+public/code-search.html
