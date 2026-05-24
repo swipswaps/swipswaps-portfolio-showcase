@@ -144,7 +144,7 @@
             if (typeof window === 'undefined') return 'http://localhost:8000';
             const hostname = window.location.hostname;
             // On GitHub Pages, explicitly target localhost
-            if (hostname.includes('github.io')) return 'http://localhost:8000';
+            if (hostname.includes('github.io')) return 'https://localhost:8443';
             // Local development
             if (hostname === 'localhost' || hostname === '127.0.0.1') return 'http://localhost:8000';
             // LAN access

@@ -57,3 +57,7 @@ docker-compose.yml
 fix-portfolio.sh
 pm2.config.js
 public/code-search.html
+
+# Local HTTPS certificates
+localhost.pem
+localhost-key.pem
