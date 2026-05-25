@@ -61,3 +61,4 @@ public/code-search.html
 # Local HTTPS certificates
 localhost.pem
 localhost-key.pem
+.env

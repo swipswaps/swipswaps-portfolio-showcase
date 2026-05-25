@@ -56,12 +56,16 @@
 <div class="hint">🖱️ Drag to rotate • Single‑click to lock • Double‑click to open • Right‑click enabled</div>
 <div class="main-layout"><div class="canvas-panel"><div id="canvas-container"></div></div>
 <div class="info-panel"><div class="panel-header"><h2>🔍 Code Explorer</h2><p>Single‑click to lock – search inside code snippets</p></div>
-<div class="panel-scroll" id="panel-scroll"><div id="status-area"></div><div class="search-area"><input type="text" id="searchInput" placeholder="🔎 Search code snippets...">
-    <select id="searchMode" style="background:#2a2a2a; color:white; border-radius:30px; padding:5px 10px; font-size:12px;">
+<div class="panel-scroll" id="panel-scroll"><div id="status-area"></div><div style="background:#0a0a14; border:1px solid #2a2a3e; border-radius:60px; padding:8px 24px 8px 16px; margin-bottom:18px; display:flex; gap:8px; align-items:center; max-width:100%; box-sizing:border-box;">
+    <input type="text" id="searchInput" placeholder="🔎 Search code snippets..." style="flex:2; min-width:100px; background:transparent; border:none; color:white; font-family:monospace; outline:none; font-size:13px;">
+    <select id="searchMode" style="flex:1; min-width:160px; background:#2a2a2a; color:white; border-radius:30px; padding:6px 12px; font-size:12px; border:1px solid #5effe0; cursor:pointer; text-align:right; direction:rtl;">
         <option value="readme">📄 Search READMEs (local)</option>
         <option value="github">🔍 Search code (GitHub API) – requires local backend running</option>
+        <option value="semantic">🧠 Semantic Search (local AI)</option>
+        <option value="token">🔑 Set GitHub Token</option>
     </select>
-    <button id="searchBtn">Search</button></div>
+    <button id="searchBtn" style="background:#2e7d64; color:white; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px;">🔍</button>
+</div>
 <div id="hoverSection" class="collapsible"><div class="collapsible-header" onclick="toggleCollapsible(this)"><span>📍 Repository Info</span><span class="indicator">▼</span></div><div class="collapsible-content active" id="hoverContent"><div class="empty-message">✨ Click any repository to lock it</div></div></div>
 <div id="searchSection" class="collapsible"><div class="collapsible-header" onclick="toggleCollapsible(this)"><span>🔎 Search Results</span><span class="indicator">▼</span></div><div class="collapsible-content active" id="searchResults"><div class="empty-message">Search results appear here</div></div></div></div></div></div>
 <div class="debug-panel" id="debugPanel"><div><strong>📡 VERBOSE LOGS</strong> <button id="downloadLogs">📥 Save</button> <button id="clearLogs">🗑️ Clear</button></div><div id="debugText">Initializing...</div></div>
