@@ -111,7 +111,7 @@
         let cloudGroup = new THREE.Group();
         scene.add(cloudGroup);
         
-        function lockRepository(name) { window.logToDebug(`🖱️ CLICK - Repository: ${name}`);
+        function lockRepository(name) {
             window.logToDebug(`🔒 Locked: ${name}`);
         }
         
@@ -153,7 +153,7 @@
                         };
                     })(repo.name);
                     
-                    div.onmouseenter = (function(n) { window.logToDebug(`🖱️ HOVER - ${n}`);
+                    div.onmouseenter = (function(n) {
                         return function() {
                             window.logToDebug(`🖱️ HOVER - ${n}`);
                         };
@@ -183,5 +183,58 @@
         
         window.logToDebug('🎨 App ready - Click spheres, drag cloud, hover for logs');
     </script>
+
+<script>
+// Throttled logging - prevents crash
+let logCount = 0;
+let logResetTime = Date.now();
+let logBuffer = [];
+
+window.safeLog = function(msg) {
+    const now = Date.now();
+    if (now - logResetTime > 1000) {
+        logCount = 0;
+        logResetTime = now;
+    }
+    
+    if (logCount < 10) {
+        logCount++;
+        const timestamp = new Date().toLocaleTimeString();
+        const logMsg = `[${timestamp}] 🐞 ${msg}`;
+        
+        const panel = document.getElementById('debug-panel');
+        if (panel) {
+            const div = document.createElement('div');
+            div.textContent = logMsg;
+            panel.appendChild(div);
+            panel.scrollTop = panel.scrollHeight;
+        }
+        console.log(logMsg);
+    } else if (logCount === 10) {
+        console.log('[THROTTLED] Additional logs suppressed');
+    }
+};
+
+// Only log essential events
+document.addEventListener('click', (e) => {
+    const target = e.target.closest('[style*="cursor: pointer"]');
+    if (target && target.textContent) {
+        window.safeLog(`🖱️ CLICK - ${target.textContent.substring(0, 30)}`);
+    }
+});
+
+// Log drag start/end only
+let dragActive = false;
+document.addEventListener('mousedown', () => { dragActive = true; });
+document.addEventListener('mouseup', () => { 
+    if (dragActive) {
+        window.safeLog(`🖱️ DRAG END`);
+        dragActive = false;
+    }
+});
+
+window.safeLog('Throttled logging active - max 10 logs/sec');
+</script>
+
 </body>
 </html>
