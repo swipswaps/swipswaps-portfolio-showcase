@@ -111,7 +111,7 @@
         let cloudGroup = new THREE.Group();
         scene.add(cloudGroup);
         
-        function lockRepository(name) {
+        function lockRepository(name) { window.logToDebug(`🖱️ CLICK - Repository: ${name}`);
             window.logToDebug(`🔒 Locked: ${name}`);
         }
         
@@ -153,7 +153,7 @@
                         };
                     })(repo.name);
                     
-                    div.onmouseenter = (function(n) {
+                    div.onmouseenter = (function(n) { window.logToDebug(`🖱️ HOVER - ${n}`);
                         return function() {
                             window.logToDebug(`🖱️ HOVER - ${n}`);
                         };
